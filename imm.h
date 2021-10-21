@@ -6,7 +6,7 @@
 #define OUT_OF_MEMORY -2
 #define OUT_OF_RANGE -3
 #define ELEM_NOT_FOUND -4
-#define EMPTY_LIST -5
+#define EMPTY_FILE -5
 
 int imm_open_file();
 int imm_convert();
