@@ -5,7 +5,11 @@
 int main(int argc, char *argv[]){
 
     if(strcmp(argv[1], "-open") == 0){
-        printf("Okay, -open abrindo ;w;\n");
+        
+        
+        if(strcmp(aux, ".txt") == 0){
+            printf("Okay, -open abrindo ;w;\n");
+        }
         return 0;
     }
     if(strcmp(argv[1], "-convert") == 0){
