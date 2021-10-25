@@ -1,12 +1,13 @@
 #include<stdio.h>
-#include<stdlib.h>
 #include<string.h>
 #include "imm.h"
 
 int main(int argc, char *argv[]){
 
     if(strcmp(argv[1], "-open") == 0){
-        imm_open_file();
+        char aux[10];
+        strcpy(aux, argv[2]);
+        imm_open_file(aux);
         return 0;
     }
     if(strcmp(argv[1], "-convert") == 0){

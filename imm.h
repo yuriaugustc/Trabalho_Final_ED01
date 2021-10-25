@@ -8,7 +8,7 @@
 #define ELEM_NOT_FOUND -4
 #define EMPTY_FILE -5
 
-int imm_open_file();
+int imm_open_file(char argv[]);
 int imm_convert();
 int imm_segment();
 int imm_cc();
