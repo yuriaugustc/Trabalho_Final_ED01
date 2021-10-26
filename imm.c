@@ -1,32 +1,36 @@
 #include<stdio.h>
 #include<string.h>
-#include "imm.h"
+#include "Timm.h"
 
 int main(int argc, char *argv[]){
 
-    if(strcmp(argv[1], "-open") == 0){
-        char aux[10];
+    if(!strcmp(argv[1], "-open")){
+        char aux[50];
+        int i = 0;
         strcpy(aux, argv[2]);
-        imm_open_file(aux);
+        i = imm_open_file(aux);
+        if(i == INVALID_FORMAT_FILE){
+            printf("This file don't have a suported format. Try format \".imm\" and \".txt\" files.\n");
+        }
         return 0;
     }
-    if(strcmp(argv[1], "-convert") == 0){
+    if(!strcmp(argv[1], "-convert")){
         imm_convert();
         return 0;
     }
-    if(strcmp(argv[1], "-segment") == 0){
+    if(!strcmp(argv[1], "-segment")){
         imm_segment();
         return 0;
     }
-    if(strcmp(argv[1], "-cc") == 0){
+    if(!strcmp(argv[1], "-cc")){
         imm_cc();
         return 0;
     }
-    if(strcmp(argv[1], "-lab") == 0){
+    if(!strcmp(argv[1], "-lab")){
         imm_lab();
         return 0;
     }
-    if(strcmp(argv[1], "-help") == 0){
+    if(!strcmp(argv[1], "-help")){
         printf("\t\t\t\t---- imm list commands -----\n\n");
         // -open;
         printf("imm -open : \t\t\t\t\t\t");

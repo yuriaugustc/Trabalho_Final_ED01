@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "TStack.h"
-#include "imm.h"
+#include "Timm.h"
 
-int verify_format(char argv[], char aux[]){
+void verify_format(char argv[], char aux[]){
     TStack *st;
     st = stack_create();
     for(int i = 0; i < strlen(argv); i++){
@@ -14,7 +14,6 @@ int verify_format(char argv[], char aux[]){
         stack_top(st, &aux[i]);
         stack_pop(st);
     }
-    return SUCCESS;
 }
 
 int imm_open_file(char argv[]){
@@ -22,14 +21,15 @@ int imm_open_file(char argv[]){
     verify_format(argv, aux);
     if(!strcmp(aux, "txt")){
         printf("Conseguindo diferenciar txt do imm!\n");
+        return SUCCESS;
     }
     else if(!strcmp(aux, "imm")){
         printf("Conseguindo diferenciar imm do txt!\n");
+        return SUCCESS;
     }
     else{
-        printf("This file don't have a suported format. Try format \".imm\" and \".txt\" files.\n");
+        return INVALID_FORMAT_FILE;
     }
-    return SUCCESS;
 }
 
 int imm_convert(){
