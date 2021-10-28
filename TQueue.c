@@ -21,7 +21,7 @@ TQueue *queue_create(){
         qe->end = NULL;
         return qe;
     }else{
-        return INVALID_NULL_POINTER;
+        return NULL;
     }
 }
 
@@ -47,10 +47,15 @@ int queue_push(TQueue *qe, char ch){
     }else{
         QNode *node = malloc(sizeof(QNode));
         QNode *aux = qe->end;
+        if(qe->qtd > 0){
+            aux->next = node;
+        }
         node->data = ch;
-        aux->next = node;
         node->next = NULL;
         qe->end = node;
+        if(qe->head == NULL){
+            qe->head = node;
+        }
         (qe->qtd)++;
         return SUCCESS;
     }
@@ -72,7 +77,8 @@ int queue_top(TQueue *qe, char *ch){
     if(qe == NULL){
         return INVALID_NULL_POINTER;
     }else{
-        *ch = qe->head->data;
+        QNode *aux = qe->head;
+        *ch = aux->data;
         return SUCCESS;
     }
 }
@@ -85,5 +91,15 @@ int queue_empty(TQueue *qe){
             return EMPTY_QUEUE;
         else
             return NOT_EMPTY;
+    }
+}
+
+int queue_size(TQueue *qe, int *qtd){
+    if(qe == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    else{
+        *qtd = qe->qtd;
+        return SUCCESS;
     }
 }

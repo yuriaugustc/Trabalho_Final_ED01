@@ -16,11 +16,9 @@ TStack *stack_create(){
         st->data = (char *)malloc(st->max*sizeof(char));
         if (st->data == NULL){
             free(st);
-            return OUT_OF_MEMORY;
+            return NULL;
         }
     return st;
-    }else{
-        return INVALID_NULL_POINTER;
     }
 }
 
