@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "TMat2D.h"
+#include "TImg.h"
 
-struct TMat2D
+struct TImg
 {
   int nrows; // number of lines
   int ncolumns; // number of columns
@@ -13,9 +13,9 @@ struct TMat2D
  *  Input: ((int)Number of lines, (int)number of columns)
  *  Output: A pointer to the first element of matrix created;
  */
-TMat2D *mat2D_create(int nrows, int ncolumns){
-    TMat2D *mat;
-    mat = malloc(sizeof(TMat2D));
+TImg *img_create(int nrows, int ncolumns){
+    TImg *mat;
+    mat = malloc(sizeof(TImg));
     if (mat != NULL){
         mat->data = malloc(nrows*ncolumns*sizeof(int));
         if (mat->data != NULL){
@@ -36,7 +36,7 @@ TMat2D *mat2D_create(int nrows, int ncolumns){
  *  Output: A int that confirm or not if the command was a success;
  *          (0 = success; -1 = fail);
  */
-int mat2D_set_value(TMat2D *mat, int i, int j, int val){
+int img_set_value(TImg *mat, int i, int j, int val){
     int aux = (i*j)-1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ; 
     if(mat[aux].data != NULL){
         mat->data[aux] = val;
@@ -46,18 +46,19 @@ int mat2D_set_value(TMat2D *mat, int i, int j, int val){
         return INVALID_NULL_POINTER;
 }
 
-TMat2D *mat2d_increase_size(TMat2D *mat, int i, int j){
+TImg *img_increase_size(TImg *mat, int i, int j){
     if(mat == NULL)
-        return INVALID_NULL_POINTER;
+        return NULL;
     if (i<=0)
-        return INVALID_NULL_POINTER;
+        return NULL;
     if (j<=0)
-        return INVALID_NULL_POINTER;
-    TMat2D *aux = mat2D_create(i, j);
-    for(int k=0;i<mat->nrows;i++){
-        for(int f=0;j<mat->ncolumns;j++){
-            int a = getvalue(mat,k,f);  //créditos: LucasAlvesUfu;
-            setvalue(aux,k,f,a);
+        return NULL;
+    TImg *aux = img_create(i, j);
+    for(int k = 0; k < mat->nrows; k++){
+        for(int f = 0; f < mat->ncolumns; f++){
+            int a; 
+            img_get_value(mat, k, f, &a);
+            img_set_value(aux, k, f, a);
         }
     }
     mat = aux;
@@ -69,7 +70,7 @@ TMat2D *mat2d_increase_size(TMat2D *mat, int i, int j){
  *  Input: (Matrix's pointer selected to inserction, line, column, (int) the value to overwrite);
  *  Output: the value of requisited position;
  */
-int mat2D_get_value(TMat2D *mat, int i, int j, int *val){
+int img_get_value(TImg *mat, int i, int j, int *val){
     int aux = 0;
     if(i != j)
         aux = (i*j)-1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
@@ -86,7 +87,7 @@ int mat2D_get_value(TMat2D *mat, int i, int j, int *val){
  *  Output: A int that confirm or not if the command was a success;
  *          (0 = success; -1 = fail);
  */
-int mat2d_set_random(TMat2D *mat){
+int img_set_random(TImg *mat){
 
     for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
         mat->data[i] = (int) rand() * 5/1000;
@@ -98,9 +99,9 @@ int mat2d_set_random(TMat2D *mat){
  *  Input: (Matrix'Pointer1 to sum, Matrix'Pointer2 to sum);
  *  Output: A Pointer to a new memory allocation with the sum's results;
  */
-TMat2D *mat2d_sum_2_mat(TMat2D *mat1, TMat2D *mat2){
-    TMat2D *sum;
-    sum = mat2D_create(mat1->nrows, mat1->ncolumns);
+TImg *img_sum_2_mat(TImg *mat1, TImg *mat2){
+    TImg *sum;
+    sum = img_create(mat1->nrows, mat1->ncolumns);
     if((mat1->nrows == mat2->nrows) && (mat1->ncolumns == mat2->ncolumns)){
         for(int i = 0; i < (mat1->nrows*mat1->ncolumns); i++){
             sum->data[i] = mat1->data[i] + mat2->data[i];
@@ -115,10 +116,10 @@ TMat2D *mat2d_sum_2_mat(TMat2D *mat1, TMat2D *mat2){
  *  Input:(Matrix'Pointer1 to multiplie, Matrix'Pointer2 to multiplie);
  *  Output: A Pointer to a new memory allocation with the multiplie's results;
  */
-TMat2D *mat2d_mult_2_mat(TMat2D *mat1, TMat2D *mat2){
-    TMat2D *mult;
+TImg *img_mult_2_mat(TImg *mat1, TImg *mat2){
+    TImg *mult;
     if(mat1->ncolumns == mat2->nrows){
-        mult = mat2D_create(mat1->nrows, mat2->ncolumns);
+        mult = img_create(mat1->nrows, mat2->ncolumns);
         for(int i = 1; i <= mat1->ncolumns; i++){
             for(int j = 1; j <= mat2->nrows; j++){
                 mult->data[i-1] += mat1->data[(j*i)-1] * mat2->data[(i*j)-1];
@@ -134,10 +135,10 @@ TMat2D *mat2d_mult_2_mat(TMat2D *mat1, TMat2D *mat2){
  *  Input:(Matrix'Pointer1 to multiplie, value to multiplies each position of matrix);
  *  Output: A Pointer to a new memory allocation with the multiplie's results;
  */
-TMat2D *mat2d_mult_mat_const(TMat2D *mat1, int value){
-    TMat2D *mult;
+TImg *img_mult_mat_const(TImg *mat1, int value){
+    TImg *mult;
     if(mat1 != NULL){
-        mult = mat2D_create(mat1->nrows, mat1->ncolumns);
+        mult = img_create(mat1->nrows, mat1->ncolumns);
         for(int i = 0; i < (mat1->nrows*mat1->ncolumns); i++){
             mult->data[i] = mat1->data[i] * value;
         }
@@ -151,7 +152,7 @@ TMat2D *mat2d_mult_mat_const(TMat2D *mat1, int value){
  *  Input:(Matrix'Pointer1 to calculate);
  *  Output: matrix's trace value;
  */
-int mat2d_find_trace(TMat2D *mat1){
+int img_find_trace(TImg *mat1){
     int value = 0;
     int aux = (mat1->nrows*mat1->ncolumns);
 
@@ -170,7 +171,7 @@ int mat2d_find_trace(TMat2D *mat1){
  *  Input:(Matrix'Pointer1 to calculate);
  *  Output: matrix's lines value;
  */
-int mat2d_sum_lines(TMat2D *mat){
+int img_sum_lines(TImg *mat){
     int aux = (mat->nrows*mat->ncolumns);
     int value = 0;
 
@@ -188,7 +189,7 @@ int mat2d_sum_lines(TMat2D *mat){
  *  Input:(Matrix'Pointer1 to calculate);
  *  Output: matrix's columns value;
  */
-int mat2d_sum_columns(TMat2D *mat){
+int img_sum_columns(TImg *mat){
     int aux = (mat->nrows*mat->ncolumns);
     int value = 0.0;
 
@@ -206,7 +207,7 @@ int mat2d_sum_columns(TMat2D *mat){
  *  Input:(Matrix'Pointer1 to calculate);
  *  Output: matrix's lines value;
  */
-int mat2d_get_line(TMat2D *mat){
+int img_get_line(TImg *mat){
     if(mat != NULL)
         return mat->nrows;
     else
@@ -217,7 +218,7 @@ int mat2d_get_line(TMat2D *mat){
  *  Input:(Matrix'Pointer1 to calculate);
  *  Output: matrix's columns value;
  */
-int mat2d_get_columns(TMat2D *mat){
+int img_get_columns(TImg *mat){
     if(mat != NULL)
         return mat->ncolumns;
     else
@@ -228,7 +229,7 @@ int mat2d_get_columns(TMat2D *mat){
  *  Input: The matrix's pointer;
  *  Output: The matrix's content; 
  */
-void mat2d_print_matrix(TMat2D *mat){
+void img_print_matrix(TImg *mat){
     for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
         printf("%.2lf ", mat->data[i]);
     }
@@ -239,7 +240,7 @@ void mat2d_print_matrix(TMat2D *mat){
  *  Output: A int that confirm or not if the command was a success;
  *          (0 = success; -1 = fail)
  */
-int mat2D_free(TMat2D *mat){
+int img_free(TImg *mat){
     if(mat == NULL){
         return INVALID_NULL_POINTER;
     }

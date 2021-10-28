@@ -21,7 +21,7 @@ TQueue *queue_create(){
         qe->end = NULL;
         return qe;
     }else{
-        return INVALID_NULL_POINTER;
+        return NULL;
     }
 }
 

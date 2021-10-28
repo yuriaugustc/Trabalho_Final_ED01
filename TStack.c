@@ -10,18 +10,14 @@ struct TStack{
 TStack *stack_create(){
     TStack *st;
     st = malloc(sizeof(TStack));
-    if (st != NULL){
         st->qtd = 0;
-        st->max = 100;
+        st->max = 30;
         st->data = (char *)malloc(st->max*sizeof(char));
         if (st->data == NULL){
             free(st);
-            return OUT_OF_MEMORY;
+            return NULL;
         }
     return st;
-    }else{
-        return INVALID_NULL_POINTER;
-    }
 }
 
 int stack_free(TStack *st){
