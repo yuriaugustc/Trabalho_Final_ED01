@@ -31,14 +31,14 @@ TImg *open_txt_file(char file[]){
         return NULL;
     }
     char *aux;
-    char print[1000], value[4] = "000";
-    int i = 0, val = 0;
+    char print[1000], value[] = "000";
+    int i = 0, j = 0, val = 0;
     while(!feof(tf)){ //lê o arquivo enquanto não encontra o fim de arquivo
         aux = fgets(print, 1000, tf);
         if(aux){ //confirma se foi possivel ler a linha
-            for(int j = 0; j < strlen(print); j++){
+            for(j = 0; j < strlen(print); j++){
                 if(print[j] == '\n'){
-                    img_set_value(img, i, j, -1); //como o TAD de imagem foi criado como valores int, criarei uma coluna a mais que terá valor -1, representando onde ocorrerá a quebra de linha ao ser printado na tela;
+                    img_set_value(img, i, j, -1); //como o TAD de imagem foi criado com valores int, criarei uma coluna a mais que terá valor -1, representando onde ocorrerá a quebra de linha ao ser printado na tela;
                     break;
                 }
                 else if(print[j] != ' '){ //verifica se acha algum espaço, enquanto não acha espaço, preenche o vetor auxiliar com o valor do pixel
@@ -46,7 +46,7 @@ TImg *open_txt_file(char file[]){
                     val++;
                 }
                 else if(print[j] == ' '){
-                    int v1 = (int)print[0], v2 = (int)print[1], v3 = (int)print[2]; //separando cada casa decimal por variavel, para fica um pouco mais limpo o codigo;
+                    int v1 = (int)print[0], v2 = (int)print[1], v3 = (int)print[2]; //separando cada casa decimal por variavel, para ficar um pouco mais limpo o codigo;
                     int v4 = (v1*100)+(v2*10)+(v3*1); //os pixels foram lidos como caractere, então deve-se convertê-los novamente ao seu valor;
                     img_set_value(img, i, j, v4);
                     val = 0;
@@ -56,35 +56,19 @@ TImg *open_txt_file(char file[]){
             }
         }
     }
+    img_set_value(img, i, j, '\0');
     fclose(tf);
     return img;
 }
 
-char *open_imm_file(char file[]){
-    FILE *fb;
-    fb = fopen(file, "r");
-    int aux = 0;
-    char print[1000], *p;
-    *p = &print;
-    while(aux != EOF){
-        aux = fscanf(fb, "%[^\n]s", print);
-    }
-    return p;
-}
-
-int open_txt_file(){
-
-}
-
 int imm_open_file(char argv[]){
     
+    TImg *img;
     char aux[4];
     verify_format(argv, aux);
-    TImg *img; //não sei pq diabos está dando erro;
     if(!strcmp(aux, "txt")){
-        open_imm_file(argv);
         printf("Conseguindo diferenciar txt do imm!\n");
-        img = open_txt_file; // o compilador fala que estou passando um ponteiro de tipo diferente aqui.
+        img = open_txt_file(argv); //função open_txt_file com memory leak;
         return SUCCESS;
     }
     else if(!strcmp(aux, "imm")){
