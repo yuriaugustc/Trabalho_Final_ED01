@@ -18,10 +18,6 @@ void verify_format(char argv[], char aux[]){
     stack_free(st);
 }
 
-TImg *open_imm_file(char file[]){
-    
-}
-
 TImg *open_txt_file(char file[]){
     FILE *tf;
     TImg *img;
@@ -60,31 +56,23 @@ TImg *open_txt_file(char file[]){
     return img;
 }
 
-char *open_imm_file(char file[]){
+TImg *open_imm_file(char file[]){
     FILE *fb;
     fb = fopen(file, "r");
-    int aux = 0;
-    char print[1000], *p;
-    *p = &print;
-    while(aux != EOF){
-        aux = fscanf(fb, "%[^\n]s", print);
-    }
-    return p;
-}
+    TImg *img;
 
-int open_txt_file(){
 
+    return img;
 }
 
 int imm_open_file(char argv[]){
     
     char aux[4];
     verify_format(argv, aux);
-    TImg *img; //não sei pq diabos está dando erro;
+    TImg *img; // não sei pq diabos está dando memory leak;
     if(!strcmp(aux, "txt")){
-        open_imm_file(argv);
         printf("Conseguindo diferenciar txt do imm!\n");
-        img = open_txt_file; // o compilador fala que estou passando um ponteiro de tipo diferente aqui.
+        img = open_txt_file(argv); // segundo o compilar estou passando pointeiros incompativeis.
         return SUCCESS;
     }
     else if(!strcmp(aux, "imm")){
