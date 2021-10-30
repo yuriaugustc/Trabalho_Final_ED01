@@ -17,7 +17,7 @@ TImg *img_create(int nrows, int ncolumns){
     TImg *mat;
     mat = malloc(sizeof(TImg));
     if (mat != NULL){
-        mat->data = malloc(nrows*ncolumns*sizeof(int));
+        mat->data = malloc((nrows*ncolumns)*sizeof(int));
         if (mat->data != NULL){
             mat->ncolumns = ncolumns;
             mat->nrows = nrows;
@@ -27,8 +27,12 @@ TImg *img_create(int nrows, int ncolumns){
             free(mat);
             return NULL;
         }
-    }
     return mat;
+    }
+    else{
+        free(mat);
+        return NULL;
+    }
 }
 
 /*  Descripition: This function overwrite the content of position passed;
@@ -37,13 +41,16 @@ TImg *img_create(int nrows, int ncolumns){
  *          (0 = success; -1 = fail);
  */
 int img_set_value(TImg *mat, int i, int j, int val){
-    int aux = (i*j)-1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ; 
-    if(mat[aux].data != NULL){
+    if(mat == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    else{
+        i -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
+        j -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
+        int aux = (i*j); 
         mat->data[aux] = val;
         return SUCCESS;
     }
-    else
-        return INVALID_NULL_POINTER;
 }
 
 TImg *img_increase_size(TImg *mat, int i, int j){
@@ -71,12 +78,13 @@ TImg *img_increase_size(TImg *mat, int i, int j){
  *  Output: the value of requisited position;
  */
 int img_get_value(TImg *mat, int i, int j, int *val){
-    int aux = 0;
-    if(i != j)
-        aux = (i*j)-1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
-                        // but I got a problem with that -1 in position of same numeration of nrows e ncolumns, that's explain the if;  
-    if(mat[i*j].data != NULL){
-        return mat->data[aux];
+    if(mat != NULL){
+        int aux = 0;
+        i -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
+        j -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
+        aux = (i*j);   
+        *val =  mat->data[aux];
+        return SUCCESS;
     }
     else 
         return INVALID_NULL_POINTER;
@@ -88,11 +96,15 @@ int img_get_value(TImg *mat, int i, int j, int *val){
  *          (0 = success; -1 = fail);
  */
 int img_set_random(TImg *mat){
-
-    for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
-        mat->data[i] = (int) rand() * 5/1000;
+    if(mat == NULL){
+        return INVALID_NULL_POINTER;
     }
-    return SUCCESS;
+    else{
+        for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
+            mat->data[i] = (int) rand() * 5/1000;
+        }
+        return SUCCESS;
+    }
 }
 
 /*  Descripition: This function sum two matrices each other;
@@ -231,7 +243,7 @@ int img_get_columns(TImg *mat){
  */
 void img_print_matrix(TImg *mat){
     for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
-        printf("%.2lf ", mat->data[i]);
+        printf("%d ", mat->data[i]);
     }
 }
 
