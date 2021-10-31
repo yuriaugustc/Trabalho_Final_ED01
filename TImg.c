@@ -48,14 +48,7 @@ int img_set_value(TImg *mat, int i, int j, int val){
         return INVALID_NULL_POINTER;
     }
     else{
-        /*if(i == 0 && j != 0){
-            i = 1;
-        }
-        if(j == 0 && i != 0){
-            j = 1;
-        }
-        int aux = (i*j); */
-        int a = i*mat->nrows+j;
+        int a = i * mat->nrows + j;
         mat->data[a] = val;
         return SUCCESS;
     }
@@ -250,12 +243,21 @@ int img_get_columns(TImg *mat){
  *  Output: The matrix's content; 
  */
 void img_print_matrix(TImg *mat){
+    int aux = 0;
     for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
-       if(mat->data[i] == -1){
+        if(aux == mat->ncolumns){
            printf("\n");
-           i++;
-       }
-       printf("%d ", mat->data[i]);
+           aux = 0;
+        }
+        if(mat->data[i] >= 100)
+            printf("%d ", mat->data[i]);
+        else if((mat->data[i] >= 10)&&(mat->data[i] < 100)){
+            printf("%d  ", mat->data[i]);
+        }
+        else if(mat->data[i] < 10){
+            printf("%d   ", mat->data[i]);
+        }
+        aux++;
     }
 }
 

@@ -4,31 +4,37 @@
 
 int main(int argc, char *argv[]){
 
-    if(!strcmp(argv[1], "-open")){
-        char aux[100];
+    //if(!strcmp(argv[1], "-open")){
+        if(argc == 2){
+            printf("To use \"-open\" command you need to pass a file to open with that command.\n");
+            printf("Example: \"imm -open file.txt\" or \"imm -open file.imm\".\n");
+            printf("Try \"imm -help\" to get more information.\n");
+            return SUCCESS;
+        }
+        char aux[] = "imagem.txt";
         int i = 0;  
-        strcpy(aux, argv[2]);
+        //strcpy(aux, argv[2]);
         i = imm_open_file(aux);
         if(i == INVALID_FORMAT_FILE){
             printf("This file don't have a suported format. Try format \".imm\" and \".txt\" files.\n");
         }
-        return 0;
-    }
+        return SUCCESS;
+    //}
     if(!strcmp(argv[1], "-convert")){
         imm_convert();
-        return 0;
+        return SUCCESS;
     }
     if(!strcmp(argv[1], "-segment")){
         imm_segment();
-        return 0;
+        return SUCCESS;
     }
     if(!strcmp(argv[1], "-cc")){
         imm_cc();
-        return 0;
+        return SUCCESS;
     }
     if(!strcmp(argv[1], "-lab")){
         imm_lab();
-        return 0;
+        return SUCCESS;
     }
     if(!strcmp(argv[1], "-help")){
         printf("\t\t\t\t---- imm list commands -----\n\n");
@@ -54,9 +60,10 @@ int main(int argc, char *argv[]){
         printf("imm -lab [imlab.txt] [imlabout.txt]: \t\t\t");
         printf("Shows a path to go through in a labirint.\n\t\t\t\t\t\t\t");
         printf("That can be used with .txt and .imm files.\n\n");
+        return SUCCESS;
     }
     else{
         printf("the command '%s' doesn't part of imm command list. try 'imm -help' to find some usable command.\n", argv[1]);
+        return SUCCESS;
     }
-    return 0;
 }
