@@ -5,8 +5,8 @@
 int main(int argc, char *argv[]){
 
     if(!strcmp(argv[1], "-open")){
-        char aux[50];
-        int i = 0;
+        char aux[100];
+        int i = 0;  
         strcpy(aux, argv[2]);
         i = imm_open_file(aux);
         if(i == INVALID_FORMAT_FILE){

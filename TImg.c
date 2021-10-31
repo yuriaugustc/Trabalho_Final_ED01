@@ -6,7 +6,7 @@ struct TImg
 {
   int nrows; // number of lines
   int ncolumns; // number of columns
-  int *data; // ponteir to matrices's data;
+  unsigned int *data; // ponteir to matrices's data;
 };
 
 /*  Descripition: This function initializes and allocates memory space foo the matrix whose line and column were passed to the criation;
@@ -14,10 +14,13 @@ struct TImg
  *  Output: A pointer to the first element of matrix created;
  */
 TImg *img_create(int nrows, int ncolumns){
+    if(nrows <= 0 || ncolumns <= 0){
+        return NULL;
+    }
     TImg *mat;
-    mat = malloc(sizeof(TImg));
+    mat = (TImg*) malloc(sizeof(TImg));
     if (mat != NULL){
-        mat->data = malloc((nrows*ncolumns)*sizeof(int));
+        mat->data = malloc(nrows*ncolumns*sizeof(int));
         if (mat->data != NULL){
             mat->ncolumns = ncolumns;
             mat->nrows = nrows;
@@ -45,10 +48,15 @@ int img_set_value(TImg *mat, int i, int j, int val){
         return INVALID_NULL_POINTER;
     }
     else{
-        i -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
-        j -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
-        int aux = (i*j); 
-        mat->data[aux] = val;
+        /*if(i == 0 && j != 0){
+            i = 1;
+        }
+        if(j == 0 && i != 0){
+            j = 1;
+        }
+        int aux = (i*j); */
+        int a = i*mat->nrows+j;
+        mat->data[a] = val;
         return SUCCESS;
     }
 }
@@ -243,7 +251,11 @@ int img_get_columns(TImg *mat){
  */
 void img_print_matrix(TImg *mat){
     for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
-        printf("%d ", mat->data[i]);
+       if(mat->data[i] == -1){
+           printf("\n");
+           i++;
+       }
+       printf("%d ", mat->data[i]);
     }
 }
 
