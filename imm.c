@@ -3,25 +3,49 @@
 #include "Timm.h"
 
 int main(int argc, char *argv[]){
-
-    //if(!strcmp(argv[1], "-open")){
+    //argv[0] = "imm";
+    //argv[1] = "-convert";
+    //argv[2] = "imagem.txt";
+    //argv[3] = "imagem.imm";
+    if(!strcmp(argv[1], "-open")){
         if(argc == 2){
             printf("To use \"-open\" command you need to pass a file to open with that command.\n");
             printf("Example: \"imm -open file.txt\" or \"imm -open file.imm\".\n");
             printf("Try \"imm -help\" to get more information.\n");
             return SUCCESS;
         }
-        char aux[] = "imagem.txt";
         int i = 0;  
-        //strcpy(aux, argv[2]);
-        i = imm_open_file(aux);
+        i = imm_open_file(argv[2]);
         if(i == INVALID_FORMAT_FILE){
             printf("This file don't have a suported format. Try format \".imm\" and \".txt\" files.\n");
         }
+        else if(i == INVALID_NULL_POINTER){
+            printf("Wasn't possible open file. Please check the file integrity and try again.\n");
+        }
         return SUCCESS;
-    //}
+    }
     if(!strcmp(argv[1], "-convert")){
-        imm_convert();
+        int i;
+        if(argc == 2){
+            printf("To use \"-convert\" command you need to pass a file and a name to create a converted filed with that command.\n");
+            printf("Example: \"imm -open file.txt converted_file\" or \"imm -open file.imm converted_file\".\n");
+            printf("Try \"imm -help\" to get more information.\n");
+            return SUCCESS;
+        }
+        if(argc == 3){
+            printf("The file will be created with original file name.\n");
+            printf("If you don't want that happen anymore, try pass the name to put in new file in next time.\n");
+            printf("Try \"imm -help\" to get more information.\n");
+            i = imm_convert(argv[2], argv[2]);
+        }else{
+            i = imm_convert(argv[2], argv[3]); 
+        }
+        if(!i){
+            printf("The file was be converted with success. Please check later for truly confimartion.\n");
+        }
+        else{
+            printf("Something went wrong. Please check the file integrity and try again.\n");
+        }
         return SUCCESS;
     }
     if(!strcmp(argv[1], "-segment")){
@@ -63,7 +87,7 @@ int main(int argc, char *argv[]){
         return SUCCESS;
     }
     else{
-        printf("the command '%s' doesn't part of imm command list. try 'imm -help' to find some usable command.\n", argv[1]);
+       // printf("the command '%s' doesn't part of imm command list. try 'imm -help' to find some usable command.\n", argv[1]);
         return SUCCESS;
     }
 }

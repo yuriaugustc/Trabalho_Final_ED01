@@ -83,3 +83,11 @@ int stack_full(TStack *st){
             return NOT_FULL;
     }
 }
+
+int stack_size(TStack *st){
+    if(st == NULL){
+        return INVALID_NULL_POINTER;
+    }else{
+        return st->qtd;
+    }
+}

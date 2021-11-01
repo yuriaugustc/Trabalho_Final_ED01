@@ -1,29 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "TImg.h"
 #include "TStack.h"
 #include "Timm.h"
 
 void verify_format(char argv[], char aux[]);
+void convert_dec_2_bin(int dec, int *bin);
+void convert_bin_2_dec(int bin, int *dec);
 TImg *open_imm_file(char file[]);
 TImg *open_txt_file(char file[]);
 
-int imm_open_file(char argv[]){
+int imm_open_file(char *argv){
     char aux[4];
     verify_format(argv, aux);
     TImg *img;
     if(!strcmp(aux, "txt")){
-        printf("Conseguindo diferenciar txt do imm!\n");
-        img = open_txt_file(argv); //acredito que esteja acontecendo segmentation fault;
+        img = open_txt_file(argv); //criando a matriz a partir do arquivo.txt;
         if(img == NULL){
-            printf("Invalid Null Pointer\n");
+            return INVALID_NULL_POINTER;
         }
-        img_print_matrix(img);
+        img_print_matrix(img); // printando a matriz utilizada;
+        img_free(img); //desalocando a matriz utilizada;
         return SUCCESS;
     }
     else if(!strcmp(aux, "imm")){
-        printf("Conseguindo diferenciar imm do txt!\n");
+        img = open_imm_file(argv); //criando a matriz a partir do arquivo.txt;
+        if(img == NULL){
+            return INVALID_NULL_POINTER;
+        }
+        img_print_matrix(img); // printando a matriz utilizada;
+        img_free(img); //desalocando a matriz utilizada;
         return SUCCESS;
     }
     else{
@@ -32,8 +40,61 @@ int imm_open_file(char argv[]){
     }
 }
 
-int imm_convert(){
-    printf("Okay, -convert convertendo fora da main ;w;\n");
+int imm_convert(char *file, char *bin){
+    char aux[4];
+    verify_format(file, aux);
+    if(!strcmp(aux, "txt")){
+        TImg *img = open_txt_file(file);
+        if(img == NULL){
+            return INVALID_NULL_POINTER;
+        }
+        FILE *bf = fopen(bin, "wb");
+        if(bf == NULL){
+            return INVALID_NULL_POINTER;
+        }
+        int lin = img_get_line(img);      // obtendo o numero de linhas do arquivo;
+        int col = img_get_columns(img);   // obtendo o numero de colunas do arquivo;
+        int value = 0, c1 = 0, l1 = 0;    // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
+        convert_dec_2_bin(lin, &l1);      
+        convert_dec_2_bin(col, &c1);      // convertendo os valores de linhas e colunas para binario;
+        fwrite(&l1, sizeof(l1), 1, bf);   // inserindo o numero de linhas no inicio do arquivo binario;
+        fwrite(&c1, sizeof(c1), 1, bf);   // inserindo o numero de colunas no inicio do arquivo binario;
+        for(int i = 0; i < lin; i++){
+            for(int j = 0; j < col; j++){
+                img_get_value(img, i, j, &value);
+                convert_dec_2_bin(value, &value);
+                fwrite(&value, sizeof(value), 1, bf);
+            }
+        }
+        img_free(img); // desalocando o TADImg em formato txt;
+        fclose(bf);
+    }
+    else if(aux, "imm"){                // arquivo binario com erro, nao sei se é a conversao de txxt para bin ou a leitura;
+        TImg *img = open_imm_file(file);
+        if(img == NULL){
+            return INVALID_NULL_POINTER;
+        }
+        FILE *bf = fopen(bin, "wb");
+        if(bf == NULL){
+            return INVALID_NULL_POINTER;
+        }
+        int lin = img_get_line(img);      // obtendo o numero de linhas do arquivo;
+        int col = img_get_columns(img);   // obtendo o numero de colunas do arquivo;
+        int value = 0, c1 = 0, l1 = 0;    // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
+        fwrite(&lin, sizeof(lin), 1, bf);   // inserindo o numero de linhas no inicio do arquivo binario;
+        fwrite(&col, sizeof(col), 1, bf);   // inserindo o numero de colunas no inicio do arquivo binario;
+        for(int i = 0; i < lin; i++){
+            for(int j = 0; j < col; j++){
+                img_get_value(img, i, j, &value);
+                fwrite(&value, sizeof(value), 1, bf);
+            }
+        }
+        img_free(img); // desalocando o TADImg em formato txt;
+        fclose(bf);
+    }
+    else{
+        return INVALID_FORMAT_FILE;
+    }
     return SUCCESS;
 }
 
@@ -52,6 +113,37 @@ int imm_lab(){
     return 0;
 }
 
+void convert_dec_2_bin(int dec, int *bin){ //criei essa funcao achando que precisava converter para binario antes de usar fwrite ;-;
+    int aux = 0, j = 0, vet[9];
+    *bin = 0;
+    while(dec != 0 && dec != 1){ // este while serve para achar a representação binaria, separando cada digito em uma posição do vetor para saber o tamanho do digito;
+        aux = dec % 2;
+        dec = dec / 2;
+        vet[j] = aux;
+        j++;
+    }
+    vet[j] = dec;
+    for(int i = j; i >= 0; i--){    // este for serve para colocar os digitos em suas devidas casaa decimais;
+        *bin += (vet[i] * trunc(pow(10, i)));  //truncate pois estava com problemas de arredondamento, por exemplo o caso 255 ficaria em 11111110;
+    }
+}
+
+void convert_bin_2_dec(int bin, int *dec){ 
+    int count = 0;
+    int vet[9], i = 0;
+    *dec = 0;
+    while(bin > 9){         // laço para separar o digitos binarios e contá-los;
+        count++;
+        vet[i] = bin % 10;
+        bin /= 10;
+        i++;
+    }
+    vet[i] = bin;
+    for(int j = 0; j <= i; j++){        // este for serve para potenciar os digitos separados devidamente em suas posicoes;
+        *dec += (vet[j] * pow(2, j));
+    }
+}
+
 void verify_format(char argv[], char aux[]){
     TStack *st;
     st = stack_create();
@@ -66,7 +158,7 @@ void verify_format(char argv[], char aux[]){
     stack_free(st);
 }
 
-TImg *tad_img_create(char file[]){ // funcao criada para evitar evitar repetição de codigo, atualmente utilizada pela open_txt e pela open_imm;
+TImg *open_txt_file(char file[]){ //funcao de abrir um arquivo de texto;
     FILE *tf;
     TImg *img;
     tf = fopen(file, "r");
@@ -75,71 +167,51 @@ TImg *tad_img_create(char file[]){ // funcao criada para evitar evitar repetiç�
     }
     char p = '0';
     int lin = 0, col = 1;
-    while(p != EOF){ //este while serve para contar as linhas do arquivo para setar o TAD de imagem;
+    while(p != EOF){        //este while serve para contar as linhas e colunas do arquivo para alocar o TAD de imagem;
         p = fgetc(tf);
-        if(p == '\n' || p == EOF){
-            lin++; // um while só para a contabilidade de linhas pois se utilizar o contador de colunas em conjunto, o numero não será exato;
+        if(p == '\n' || p == EOF){  // verificacao de linhas;
+            lin++; 
         }
-    }
-    rewind(tf); // colocando o ponteiro novamente ao inicio do arquivo, para ler uma linha inteira e contabilizar as colunas;
-    p = '0'; // setando a variavel em zero para que a ultima leitura nao interfira no funcionamento do codigo;
-    while(p != '\n'){ //este while conta as colunas do arquivo, por isso roda por apenas uma linha;
-        p = fgetc(tf);
-        if(p == '\t'){
+        if(lin == 0 && p == '\t'){  // verificacao de colunas. Só será executado na primeira linha;
             col++;
         }
     }
-    fclose(tf);
+    rewind(tf);
     img = img_create(lin, col);
-    if(img == NULL){
-        return NULL;
-    }
-    return img;
-}
-
-TImg *open_txt_file(char file[]){ //funcao de abrir um arquivo de texto;
-    FILE *tf;
-    TImg *img;
-    tf = fopen(file, "r");
-    if(tf == NULL){
-        return NULL;
-    }
-    img = tad_img_create(file);
     if(img == NULL){
         return NULL;
     }
     char value[] = "000";
     int i = 0, j = 0, val = 0;
     int v1 = 0, v2 = 0, v3 = 0, v4 = 0; 
-    char p = '0'; //setando a variavel com zero para que a ultima leitura da variavel nao interfira no funcionamento do codigo;    
-    while(p != EOF){ // o while verifica primeiro e depois lê o caractere;
+    p = '0';          //setando a variavel com zero para que a ultima leitura da variavel nao interfira no funcionamento do codigo;    
+    while(p != EOF){  // o while verifica primeiro e depois lê o caractere;
         p = fgetc(tf);
         
         if((p != '\t' && p != EOF && p != '\n')){ // casos onde se leu caracteres de pixel;
             value[val] = p;
             val++;
         }
-        if((p == '\t' || p == EOF || p == '\n')){ //casos onde foi encontrado o espaçamento de pixel, ou o fim do arquivo;
-                                                     //o caso de EOF é verificado pois o ultimo pixel ficaria sem ser setado caso contrario ( ler comentario ao lado do while);
+        if((p == '\t' || p == EOF || p == '\n')){ //casos onde foi encontrado o espaçamento de pixel, ou o fim do arquivo, o caso de EOF é verificado pois o ultimo pixel ficaria sem ser setado caso contrario ( ler comentario ao lado do while);
             if(val == 3 || val == 4){
-                v1 = value[0] - '0'; //separando cada casa decimal por variavel, para ficar um pouco mais limpo o codigo;
+                v1 = value[0] - '0';        //separando cada casa decimal por variavel, para ficar um pouco mais limpo o codigo;
                 v2 = value[1] - '0'; 
-                v3 = value[2] - '0'; // casos onde se leu 3 caracteres de pixel;
+                v3 = value[2] - '0';        // casos onde se leu 3 caracteres de pixel;
             }
             else if(val == 2){
                 v1 = 0;
                 v2 = value[0] - '0';
-                v3 = value[1] - '0'; // casos onde se leu 2 caracteres de pixel;
+                v3 = value[1] - '0';                        // casos onde se leu 2 caracteres de pixel;
             }
             else if(val == 1){
                 v1 = 0;
                 v2 = 0;
-                v3 = value[0] - '0'; // casos onde se leu apenas 1 caractere de pixel;
+                v3 = value[0] - '0';                        // casos onde se leu apenas 1 caractere de pixel;
             }
-            v4 = (v1*100) + (v2*10) + (v3*1); //os pixels foram lidos como caractere, então deve-se convertê-los novamente ao seu valor;            
+            v4 = (v1*100) + (v2*10) + (v3*1);               //os pixels foram lidos como caractere, então deve-se convertê-los novamente ao seu valor;            
             img_set_value(img, i, j, v4);
             val = 0;
-            value[0] = '0'; value[1] ='0'; value[2] = '0'; //zerando o vetor novamente para que o proximo pixel nao seja afetado(casos onde o pixel possui valor menor à 100, por exemplo);
+            value[0] = '0'; value[1] ='0'; value[2] = '0';  //zerando o vetor novamente para que o proximo pixel nao seja afetado(casos onde o pixel possui valor menor à 100, por exemplo);
             j++;
         }
     }
@@ -147,11 +219,30 @@ TImg *open_txt_file(char file[]){ //funcao de abrir um arquivo de texto;
     return img;
 }
 
-TImg *open_imm_file(char file[]){
-    FILE *fb;
-    fb = fopen(file, "rb");
-    TImg *img;
-    
-
+TImg *open_imm_file(char file[]){       // binario com erro, nao sei se é a leitura ou a conversao de txt para binario;
+    FILE *bf;
+    bf = fopen(file, "rb");
+    if(bf == NULL){
+        return NULL;
+    }
+    int lin = 0;
+    int col = 0;
+    fread(&lin,sizeof(lin), 1, bf);  // lendo o numero de linhas do arquivo binario, gravado por padrao no primeiro bloco de memoria do arquivo.
+    fread(&col,sizeof(col), 1, bf);  // lendo o numero de colunas do arquivo binario, gravado por padrao no segundo bloco de memoria do arquivo;
+    convert_bin_2_dec(lin, &lin);    // convertendo os numeros de binario para decimal para inicializar o tad de imagem;
+    convert_bin_2_dec(col, &col);    // convertendo os numeros de binario para decimal para inicializar o tad de imagem;
+    TImg *img = img_create(lin, col); 
+    if(img == NULL){
+        printf("é aqui");
+        return NULL;
+    }
+    int aux = 0;
+    for(int i = 0; i < lin; i++){
+        for(int j = 0; j < col; j++){
+            fread(&aux,sizeof(aux), 1, bf); // lendo o bloco de memoria correspondente ao pixel;
+            convert_bin_2_dec(aux, &aux);   // convertendo o bloco binario para ser numero em base decimal;
+            img_set_value(img, i, j, aux);  // inserindo o numero decimal no tad de imagem;
+        }
+    }
     return img;
 }

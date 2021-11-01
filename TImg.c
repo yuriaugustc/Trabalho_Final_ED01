@@ -80,11 +80,8 @@ TImg *img_increase_size(TImg *mat, int i, int j){
  */
 int img_get_value(TImg *mat, int i, int j, int *val){
     if(mat != NULL){
-        int aux = 0;
-        i -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
-        j -= 1; // take away -1 because the vector initializes in 0, and that the user don't need to know ;) ;
-        aux = (i*j);   
-        *val =  mat->data[aux];
+        int aux = i * mat->nrows + j;
+        *val = mat->data[aux];
         return SUCCESS;
     }
     else 
@@ -244,6 +241,7 @@ int img_get_columns(TImg *mat){
  */
 void img_print_matrix(TImg *mat){
     int aux = 0;
+    printf("Printing the image pixel by pixel:\n\n");
     for(int i = 0; i < (mat->nrows*mat->ncolumns); i++){
         if(aux == mat->ncolumns){
            printf("\n");
@@ -259,6 +257,7 @@ void img_print_matrix(TImg *mat){
         }
         aux++;
     }
+    printf("\n");
 }
 
 /*  Descripition: This function deallocate the matrix's memory; 
