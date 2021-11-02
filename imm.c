@@ -26,18 +26,13 @@ int main(int argc, char *argv[]){
     }
     if(!strcmp(argv[1], "-convert")){
         int i;
-        if(argc == 2){
+        if(argc <= 2){
             printf("To use \"-convert\" command you need to pass a file and a name to create a converted filed with that command.\n");
             printf("Example: \"imm -open file.txt converted_file\" or \"imm -open file.imm converted_file\".\n");
             printf("Try \"imm -help\" to get more information.\n");
             return SUCCESS;
         }
-        if(argc == 3){
-            printf("The file will be created with original file name.\n");
-            printf("If you don't want that happen anymore, try pass the name to put in new file in next time.\n");
-            printf("Try \"imm -help\" to get more information.\n");
-            i = imm_convert(argv[2], argv[2]);
-        }else{
+        else{
             i = imm_convert(argv[2], argv[3]); 
         }
         if(!i){

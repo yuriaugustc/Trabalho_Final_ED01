@@ -31,7 +31,7 @@ int imm_open_file(char *argv){
             return INVALID_NULL_POINTER;
         }
         img_print_matrix(img); // printando a matriz utilizada;
-        img_free(img); //desalocando a matriz utilizada;
+        img_free(img); // desalocando a matriz utilizada;
         return SUCCESS;
     }
     else{
@@ -52,43 +52,16 @@ int imm_convert(char *file, char *bin){
         if(bf == NULL){
             return INVALID_NULL_POINTER;
         }
-        int lin = img_get_line(img);      // obtendo o numero de linhas do arquivo;
-        int col = img_get_columns(img);   // obtendo o numero de colunas do arquivo;
-        int value = 0, c1 = 0, l1 = 0;    // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
-        convert_dec_2_bin(lin, &l1);      
-        convert_dec_2_bin(col, &c1);      // convertendo os valores de linhas e colunas para binario;
-        fwrite(&l1, sizeof(l1), 1, bf);   // inserindo o numero de linhas no inicio do arquivo binario;
-        fwrite(&c1, sizeof(c1), 1, bf);   // inserindo o numero de colunas no inicio do arquivo binario;
-        for(int i = 0; i < lin; i++){
-            for(int j = 0; j < col; j++){
-                img_get_value(img, i, j, &value);
-                convert_dec_2_bin(value, &value);
-                fwrite(&value, sizeof(value), 1, bf);
-            }
+        int lin = 0, col = 0, value = 0, c1 = 0, l1 = 0, i = 0, j = 0;      // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
+        lin = img_get_line(img);        // obtendo o numero de linhas do arquivo;
+        fwrite(&lin, sizeof(int), 1, bf);     // inserindo o numero de linhas no inicio do arquivo binario;
+        col = img_get_columns(img);     // obtendo o numero de colunas do arquivo;
+        fwrite(&col, sizeof(int), 1, bf);     // inserindo o numero de colunas no inicio do arquivo binario;
+        for(j = 0; j < lin*col; j++){
+            img_get_value(img, i, j, &value);
+            fwrite(&value, sizeof(int), 1, bf);
         }
-        img_free(img); // desalocando o TADImg em formato txt;
-        fclose(bf);
-    }
-    else if(aux, "imm"){                // arquivo binario com erro, nao sei se é a conversao de txxt para bin ou a leitura;
-        TImg *img = open_imm_file(file);
-        if(img == NULL){
-            return INVALID_NULL_POINTER;
-        }
-        FILE *bf = fopen(bin, "wb");
-        if(bf == NULL){
-            return INVALID_NULL_POINTER;
-        }
-        int lin = img_get_line(img);      // obtendo o numero de linhas do arquivo;
-        int col = img_get_columns(img);   // obtendo o numero de colunas do arquivo;
-        int value = 0, c1 = 0, l1 = 0;    // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
-        fwrite(&lin, sizeof(lin), 1, bf);   // inserindo o numero de linhas no inicio do arquivo binario;
-        fwrite(&col, sizeof(col), 1, bf);   // inserindo o numero de colunas no inicio do arquivo binario;
-        for(int i = 0; i < lin; i++){
-            for(int j = 0; j < col; j++){
-                img_get_value(img, i, j, &value);
-                fwrite(&value, sizeof(value), 1, bf);
-            }
-        }
+        open_imm_file("img.imm");
         img_free(img); // desalocando o TADImg em formato txt;
         fclose(bf);
     }
@@ -226,23 +199,17 @@ TImg *open_imm_file(char file[]){       // binario com erro, nao sei se é a lei
         return NULL;
     }
     int lin = 0;
+    fread(&lin,sizeof(int), 1, bf);  // lendo o numero de linhas do arquivo binario, gravado por padrao no primeiro bloco de memoria do arquivo.
     int col = 0;
-    fread(&lin,sizeof(lin), 1, bf);  // lendo o numero de linhas do arquivo binario, gravado por padrao no primeiro bloco de memoria do arquivo.
-    fread(&col,sizeof(col), 1, bf);  // lendo o numero de colunas do arquivo binario, gravado por padrao no segundo bloco de memoria do arquivo;
-    convert_bin_2_dec(lin, &lin);    // convertendo os numeros de binario para decimal para inicializar o tad de imagem;
-    convert_bin_2_dec(col, &col);    // convertendo os numeros de binario para decimal para inicializar o tad de imagem;
+    fread(&col,sizeof(int), 1, bf);  // lendo o numero de colunas do arquivo binario, gravado por padrao no segundo bloco de memoria do arquivo;
     TImg *img = img_create(lin, col); 
     if(img == NULL){
-        printf("é aqui");
         return NULL;
     }
-    int aux = 0;
-    for(int i = 0; i < lin; i++){
-        for(int j = 0; j < col; j++){
-            fread(&aux,sizeof(aux), 1, bf); // lendo o bloco de memoria correspondente ao pixel;
-            convert_bin_2_dec(aux, &aux);   // convertendo o bloco binario para ser numero em base decimal;
-            img_set_value(img, i, j, aux);  // inserindo o numero decimal no tad de imagem;
-        }
+    int aux = 0, i = 0, j = 0;
+    for(j = 0; j < lin*col; j++){
+        fread(&aux,sizeof(int), 1, bf); // lendo o bloco de memoria correspondente ao pixel;
+        img_set_value(img, i, j, aux);  // inserindo o numero decimal no tad de imagem;
     }
     return img;
 }

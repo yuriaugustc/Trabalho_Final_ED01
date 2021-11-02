@@ -54,6 +54,20 @@ int img_set_value(TImg *mat, int i, int j, int val){
     }
 }
 
+/*  Descripition: This function return the value of requisited position;
+ *  Input: (Matrix's pointer selected to inserction, line, column, (int) the value to overwrite);
+ *  Output: the value of requisited position;
+ */
+int img_get_value(TImg *mat, int i, int j, int *val){
+    if(mat != NULL){
+        int aux = (i * mat->nrows) + j;
+        *val = mat->data[aux];
+        return SUCCESS;
+    }
+    else 
+        return INVALID_NULL_POINTER;
+}
+
 TImg *img_increase_size(TImg *mat, int i, int j){
     if(mat == NULL)
         return NULL;
@@ -74,19 +88,6 @@ TImg *img_increase_size(TImg *mat, int i, int j){
     return mat;
 }
 
-/*  Descripition: This function return the value of requisited position;
- *  Input: (Matrix's pointer selected to inserction, line, column, (int) the value to overwrite);
- *  Output: the value of requisited position;
- */
-int img_get_value(TImg *mat, int i, int j, int *val){
-    if(mat != NULL){
-        int aux = i * mat->nrows + j;
-        *val = mat->data[aux];
-        return SUCCESS;
-    }
-    else 
-        return INVALID_NULL_POINTER;
-}
 
 /*  Descripition: This function sets random's content in matrix's positions;
  *  Input: (Matrix's pointer)
