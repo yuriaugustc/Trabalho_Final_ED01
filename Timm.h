@@ -10,8 +10,8 @@
 #define INVALID_FORMAT_FILE -6
 
 int imm_open_file(char argv[]);
-int imm_convert();
-int imm_segment();
+int imm_convert(char *file, char *bin);
+int imm_segment(char *file, char *bin, int thr);
 int imm_cc();
 int imm_lab();
 

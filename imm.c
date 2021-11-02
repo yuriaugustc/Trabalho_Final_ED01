@@ -3,10 +3,11 @@
 #include "Timm.h"
 
 int main(int argc, char *argv[]){
-    //argv[0] = "imm";
-    //argv[1] = "-convert";
-    //argv[2] = "imagem.txt";
-    //argv[3] = "imagem.imm";
+    argv[0] = "imm";
+    argv[1] = "-segment";
+    argv[2] = "-10";
+    argv[3] = "imagem.txt";
+    argv[4] = "imagem.imm";
     if(!strcmp(argv[1], "-open")){
         if(argc == 2){
             printf("To use \"-open\" command you need to pass a file to open with that command.\n");
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]){
         int i;
         if(argc <= 2){
             printf("To use \"-convert\" command you need to pass a file and a name to create a converted filed with that command.\n");
-            printf("Example: \"imm -open file.txt converted_file\" or \"imm -open file.imm converted_file\".\n");
+            printf("Example: \"imm -convert file.txt name_converted_file.imm\" or \"imm -convert file.imm name_converted_file.txt\".\n");
             printf("Try \"imm -help\" to get more information.\n");
             return SUCCESS;
         }
@@ -44,7 +45,43 @@ int main(int argc, char *argv[]){
         return SUCCESS;
     }
     if(!strcmp(argv[1], "-segment")){
-        imm_segment();
+        int i;
+        if(argc <= 2){
+            printf("To use \"-segment\" command you need to pass a number to do the thresholding, a file and a name to create a segmented filed with that command.\n");
+            printf("Examples: \"imm -segment thr file.txt name_segmented_file.imm\"\n");
+            printf("          \"imm -segment thr file.imm name_segmented_file.txt\"\n");
+            printf("          \"imm -segment thr file.imm name_segmented_file.imm\"\n");
+            printf("          \"imm -segment thr file.txt name_segmented_file.txt\"\n");
+            printf("Try \"imm -help\" to get more information.\n");
+            return SUCCESS;
+        }
+        else{
+            int thr = 0;
+            char th[] = "000";
+            strcpy(th, argv[2]);
+            if(strlen(th) == 3){
+                thr = ((th[0] - '0')*100) + ((th[1] - '0')*10) + (th[2] - '0');
+            }
+            else if(strlen(th) == 2){
+                thr = ((th[0] - '0')*10) + (th[1] - '0');
+            }
+            else if(strlen(th) == 1){
+                thr = th[0] - '0';
+            }
+            if(thr >= 0 && thr <= 255){
+                i = imm_segment(argv[3], argv[4], thr);
+            }
+            else{
+                printf("This number of thresholding is invalid, pic a number between 0 and 255.\n");
+                return SUCCESS;
+            } 
+        }
+        if(!i){
+            printf("The file was be segmented with success. Please check later for truly confimartion.\n");
+        }
+        else{
+            printf("Something went wrong. Please check the file integrity and try again.\n");
+        }
         return SUCCESS;
     }
     if(!strcmp(argv[1], "-cc")){
@@ -82,7 +119,7 @@ int main(int argc, char *argv[]){
         return SUCCESS;
     }
     else{
-       // printf("the command '%s' doesn't part of imm command list. try 'imm -help' to find some usable command.\n", argv[1]);
+       printf("the command '%s' doesn't part of imm command list. try 'imm -help' to find some usable command.\n", argv[1]);
         return SUCCESS;
     }
 }

@@ -7,8 +7,10 @@
 #include "Timm.h"
 
 void verify_format(char argv[], char aux[]);
-void convert_dec_2_bin(int dec, int *bin);
-void convert_bin_2_dec(int bin, int *dec);
+int segment_bin_2_bin(char *file, char *bin, int thr);
+int segment_txt_2_txt(char *file, char *bin, int thr);
+int convert_txt_2_bin(char *file, char *bin, int thr);
+int convert_bin_2_txt(char *file, char *bin, int thr);
 TImg *open_imm_file(char file[]);
 TImg *open_txt_file(char file[]);
 
@@ -42,36 +44,48 @@ int imm_open_file(char *argv){
 
 int imm_convert(char *file, char *bin){
     char aux[4];
+    int i;
     verify_format(file, aux);
-    if(!strcmp(aux, "txt")){
-        TImg *img = open_txt_file(file);
-        if(img == NULL){
-            return INVALID_NULL_POINTER;
+    if(!strcmp(aux, "txt")){     //conversao de bin para txt;
+        i = convert_txt_2_bin(file, bin, -1);
+        if(!i){
+            return SUCCESS;
+        }else{
+            return INVALID_FORMAT_FILE;
         }
-        FILE *bf = fopen(bin, "wb");
-        if(bf == NULL){
-            return INVALID_NULL_POINTER;
+    }
+    else if(aux, "imm"){         // conversao de imm para txt;
+        i = convert_bin_2_txt(file, bin, -1);
+        if(!i){
+            return SUCCESS;
+        }else{
+            return INVALID_FORMAT_FILE;
         }
-        int lin = 0, col = 0, value = 0, c1 = 0, l1 = 0, i = 0, j = 0;      // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
-        lin = img_get_line(img);        // obtendo o numero de linhas do arquivo;
-        fwrite(&lin, sizeof(int), 1, bf);     // inserindo o numero de linhas no inicio do arquivo binario;
-        col = img_get_columns(img);     // obtendo o numero de colunas do arquivo;
-        fwrite(&col, sizeof(int), 1, bf);     // inserindo o numero de colunas no inicio do arquivo binario;
-        for(j = 0; j < lin*col; j++){
-            img_get_value(img, i, j, &value);
-            fwrite(&value, sizeof(int), 1, bf);
-        }
-        open_imm_file("img.imm");
-        img_free(img); // desalocando o TADImg em formato txt;
-        fclose(bf);
     }
     else{
         return INVALID_FORMAT_FILE;
     }
-    return SUCCESS;
 }
 
-int imm_segment(){
+int imm_segment(char *file, char *bin, int thr){
+    char file1[4], file2[4];
+    int i;
+    verify_format(file, file1); // verificando o formato dos dois arquivos
+    verify_format(bin, file2);
+
+    if(!strcmp(file1, "txt")){
+        if(!strcmp(file2, "txt")){
+            i = segment_txt_2_txt(file, bin, thr);
+        }else{
+            i = convert_txt_2_bin(file, bin, thr);
+        }
+    }else if(!strcmp(file1, "imm")){
+        if(!strcmp(file2, "imm")){
+            i = segment_bin_2_bin(file, bin, thr);
+        }else{
+            i = convert_bin_2_txt(file, bin, thr);
+        }
+    }
     printf("Okay, -segment segmentando fora da main ;w;\n");
     return SUCCESS;
 }
@@ -84,37 +98,6 @@ int imm_cc(){
 int imm_lab(){
     printf("Okay, -lab labindo fora da main ;w;\n");
     return 0;
-}
-
-void convert_dec_2_bin(int dec, int *bin){ //criei essa funcao achando que precisava converter para binario antes de usar fwrite ;-;
-    int aux = 0, j = 0, vet[9];
-    *bin = 0;
-    while(dec != 0 && dec != 1){ // este while serve para achar a representação binaria, separando cada digito em uma posição do vetor para saber o tamanho do digito;
-        aux = dec % 2;
-        dec = dec / 2;
-        vet[j] = aux;
-        j++;
-    }
-    vet[j] = dec;
-    for(int i = j; i >= 0; i--){    // este for serve para colocar os digitos em suas devidas casaa decimais;
-        *bin += (vet[i] * trunc(pow(10, i)));  //truncate pois estava com problemas de arredondamento, por exemplo o caso 255 ficaria em 11111110;
-    }
-}
-
-void convert_bin_2_dec(int bin, int *dec){ 
-    int count = 0;
-    int vet[9], i = 0;
-    *dec = 0;
-    while(bin > 9){         // laço para separar o digitos binarios e contá-los;
-        count++;
-        vet[i] = bin % 10;
-        bin /= 10;
-        i++;
-    }
-    vet[i] = bin;
-    for(int j = 0; j <= i; j++){        // este for serve para potenciar os digitos separados devidamente em suas posicoes;
-        *dec += (vet[j] * pow(2, j));
-    }
 }
 
 void verify_format(char argv[], char aux[]){
@@ -212,4 +195,134 @@ TImg *open_imm_file(char file[]){       // binario com erro, nao sei se é a lei
         img_set_value(img, i, j, aux);  // inserindo o numero decimal no tad de imagem;
     }
     return img;
+}
+
+int convert_txt_2_bin(char *file, char *bin, int thr){
+    int v0 = 0, v1 = 1;
+    TImg *img = open_txt_file(file);
+    if(img == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    FILE *bf = fopen(bin, "wb");
+    if(bf == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    int lin = 0, col = 0, value = 0, i = 0, j = 0;      // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
+    lin = img_get_line(img);        // obtendo o numero de linhas do arquivo;
+    fwrite(&lin, sizeof(int), 1, bf);   // inserindo o numero de linhas no inicio do arquivo binario;
+    col = img_get_columns(img);     // obtendo o numero de colunas do arquivo;
+    fwrite(&col, sizeof(int), 1, bf);   // inserindo o numero de colunas no inicio do arquivo binario;
+    for(j = 0; j < lin*col; j++){
+        img_get_value(img, i, j, &value);
+        if(thr == -1){                  // re-utilização de codigo, -1 é codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
+            fwrite(&value, sizeof(int), 1, bf);
+        }else{
+            if(value > thr){                    //thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                fwrite(&v1, sizeof(int), 1, bf);    //fiquei na duvida se caso eu inserisse dentro do fwrite o valor "1", se ele funcionaria ou se ele procuraria o que está no endereço 1;
+            }else{                              //thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
+                fwrite(&v0, sizeof(int), 1, bf);    // mesma duvida do fwrite anterior;
+            }
+        }
+    }
+    img_free(img); // desalocando o TADImg;
+    fclose(bf);    // fechando o arquivo;
+    return SUCCESS;
+}
+
+int convert_bin_2_txt(char *bin, char *file, int thr){
+    TImg *img = open_imm_file(bin);
+    if(img == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    FILE *tf = fopen(file, "w");
+    if(tf == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    int lin = img_get_line(img);      // obtendo o numero de linhas do arquivo;
+    int col = img_get_columns(img);   // obtendo o numero de colunas do arquivo;
+    int value = 0, i = 0, j = 0;                 
+    for(j = 0; j < lin*col; j++){
+        img_get_value(img, i, j, &value);
+        if(thr == -1){              // re-utilização de codigo, -1 é um codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
+            fprintf(tf, "%d\t", value);
+        }else{
+            if(value > thr){                    //thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                fprintf(tf, "1\t");    
+            }
+            else{                               //thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                fprintf(tf, "0\t");
+            }
+        }
+        if((j/col-1) == 0){
+            fprintf(tf, "\n");
+        }
+    }
+    img_free(img); // desalocando o TADImg;
+    fclose(tf);    // fechando o arquivo;
+    return SUCCESS;
+}
+
+int segment_bin_2_bin(char *file, char *bin, int thr){
+    int v0 = 0, v1 = 1;
+    TImg *img = open_txt_file(file);
+    if(img == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    FILE *bf = fopen(bin, "wb");
+    if(bf == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    int lin = 0, col = 0, value = 0, i = 0, j = 0;      // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
+    lin = img_get_line(img);        // obtendo o numero de linhas do arquivo;
+    fwrite(&lin, sizeof(int), 1, bf);   // inserindo o numero de linhas no inicio do arquivo binario;
+    col = img_get_columns(img);     // obtendo o numero de colunas do arquivo;
+    fwrite(&col, sizeof(int), 1, bf);   // inserindo o numero de colunas no inicio do arquivo binario;
+    for(j = 0; j < lin*col; j++){
+        img_get_value(img, i, j, &value);
+        if(thr == -1){                  // re-utilização de codigo, -1 é codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
+            fwrite(&value, sizeof(int), 1, bf);
+        }else{
+            if(value > thr){                    //thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                fwrite(&v1, sizeof(int), 1, bf);    //fiquei na duvida se caso eu inserisse dentro do fwrite o valor "1", se ele funcionaria ou se ele procuraria o que está no endereço 1;
+            }else{                              //thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
+                fwrite(&v0, sizeof(int), 1, bf);    // mesma duvida do fwrite anterior;
+            }
+        }
+    }
+    img_free(img); // desalocando o TADImg;
+    fclose(bf);    // fechando o arquivo;
+    return SUCCESS;
+}
+
+int segment_txt_2_txt(char *file, char *bin, int thr){
+    TImg *img = open_imm_file(file);
+    if(img == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    FILE *tf = fopen(bin, "w");
+    if(tf == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    int lin = img_get_line(img);      // obtendo o numero de linhas do arquivo;
+    int col = img_get_columns(img);   // obtendo o numero de colunas do arquivo;
+    int value = 0, i = 0, j;                 
+    for(j = 0; j < lin*col; j++){
+        img_get_value(img, i, j, &value);
+        if(thr == -1){                // re-utilização de codigo, -1 é um codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
+            fprintf(tf, "%d\t", value);
+        }else{
+            if(value > thr){          //thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                fprintf(tf, "1\t");    
+            }
+            else{                     //thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                fprintf(tf, "0\t");
+            }
+        }
+        if((j/col-1) == 0){
+            fprintf(tf, "\n");
+        }
+    }
+    img_free(img); // desalocando o TADImg;
+    fclose(tf);    // fechando o arquivo;
+    return SUCCESS;
 }
