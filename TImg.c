@@ -48,8 +48,8 @@ int img_set_value(TImg *mat, int i, int j, int val){
         return INVALID_NULL_POINTER;
     }
     else{
-        int a = i * mat->nrows + j;
-        mat->data[a] = val;
+        int aux = (i * mat->ncolumns) + j;
+        mat->data[aux] = val;
         return SUCCESS;
     }
 }
@@ -59,13 +59,14 @@ int img_set_value(TImg *mat, int i, int j, int val){
  *  Output: the value of requisited position;
  */
 int img_get_value(TImg *mat, int i, int j, int *val){
-    if(mat != NULL){
-        int aux = (i * mat->nrows) + j;
+    if(mat == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    else{
+        int aux = (i * mat->ncolumns) + j;
         *val = mat->data[aux];
         return SUCCESS;
     }
-    else 
-        return INVALID_NULL_POINTER;
 }
 
 TImg *img_increase_size(TImg *mat, int i, int j){
