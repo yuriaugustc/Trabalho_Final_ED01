@@ -135,7 +135,7 @@ void verify_format(char argv[], char aux[]){
     stack_free(st);
 }
 
-TImg *open_txt_file(char file[]){ //funcao de abrir um arquivo de texto;
+TImg *open_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
     FILE *tf;
     TImg *img;
     tf = fopen(file, "r");
