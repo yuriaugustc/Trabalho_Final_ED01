@@ -6,7 +6,7 @@ int main(int argc, char *argv[]){
     //argv[0] = "imm";
     //argv[1] = "-convert";
     //argv[2] = "-10";
-    //argv[2] = "imagem.txt";
+    //argv[2] = "img.imm";
     //argv[3] = "img.txt";
     if(!strcmp(argv[1], "-open")){
         if(argc == 2){

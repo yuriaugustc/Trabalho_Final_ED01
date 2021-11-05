@@ -33,4 +33,76 @@ void convert_bin_2_dec(int bin, int *dec){
     }
 }
 
+int convert_bin_2_txt(char *bin, char *file, int thr){  // funcao nao esta em pleno funcionamento, verificar o que houve;
+    TImg *img = open_imm_file(bin);
+    if(img == NULL){
+        //printf("aqui fml");
+        return INVALID_NULL_POINTER;
+    }
+    FILE *tf = fopen(file, "w");
+    if(tf == NULL){
+        //printf("nao, eh aqui fml");
+        return INVALID_NULL_POINTER;
+    }
+    int value = 0, lin = 0, col = 0, i = 0, j = 0;                 
+    lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
+    col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
+    for(i = 0; i < lin; i++){   
+        for(j = 0; j < col; j++){
+            img_get_value(img, i, j, &value);
+            if(thr == -1){  // re-utilização de codigo, -1 é um codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
+                fprintf(tf, "%d", value);
+            }else{
+                if(value > thr){   // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                    fprintf(tf, "1");    
+                }
+                else{     // thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
+                    fprintf(tf, "0");
+                }
+            }
+            if(j+1 != col)
+                fprintf(tf,"\t"); // controle para separar os pixels por coluna e não acabar inserindo um \t na ultima coluna. Isso estava fazendo com que a impressao de um arquivo txt repetisse a ultima coluna;
+        }
+        if(i+1 != lin)
+            fprintf(tf,"\n"); // controle para criar uma nova linha somente até a ultima linha do arquivo. Isso estava criando uma linha a mais durante a conversao;
+    }
+    img_free(img); // desalocando o TADImg;
+    fclose(tf);  // fechando o arquivo;
+    return SUCCESS;
+}
+
+int convert_txt_2_bin(char *file, char *bin, int thr){ // funcao nao esta em pleno funcionamento, verificar o que houve;
+    int v0 = 0, v1 = 1;
+    TImg *img = open_txt_file(file);
+    if(img == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    FILE *bf = fopen(bin, "wb");
+    if(bf == NULL){
+        return INVALID_NULL_POINTER;
+    }
+    int lin = 0, col = 0, value = 0, i = 0, j = 0;                 
+    lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
+    fwrite(&lin, sizeof(int), 1, bf);  // inserindo o numero de linhas no inicio do arquivo binario;
+    col = img_get_columns(img);  // obtendo o numero de colunas do arquivo;
+    fwrite(&col, sizeof(int), 1, bf);  // inserindo o numero de colunas no inicio do arquivo binario;
+    for(i = 0; i < lin; i++){   
+        for(j = 0; j < col; j++){
+            img_get_value(img, i, j, &value);
+            if(thr == -1){   // re-utilização de codigo, -1 é codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
+                fwrite(&value, sizeof(int), 1, bf);
+            }else{
+                if(value > thr){    // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                    fwrite(&v1, sizeof(int), 1, bf);    // fiquei na duvida se caso eu inserisse dentro do fwrite o valor "1", se ele funcionaria ou se ele procuraria o que está no endereço 1;
+                }else{   // thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
+                    fwrite(&v0, sizeof(int), 1, bf);    // mesma duvida do fwrite anterior;
+                }
+            }
+        }
+    }
+    img_free(img); // desalocando o TADImg;
+    fclose(bf);  // fechando o arquivo;
+    return SUCCESS;
+}
+
 */
