@@ -44,7 +44,7 @@ int imm_convert(char *file, char *bin){
     int i;
     verify_format(bin, bin1); // verificação da extensao do primeiro arquivo;
     if(!strcmp(bin1, "txt")){   // conversao de imm para txt, ou de txt para txt, a verificação da extensao do segundo arquivo ocorre dentro da funcao auxiliar;
-        i = segment_2_txt(file, bin, -1); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
+        i = segment_2_txt(file, bin, NULL_CODE); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
         if(!i){
             return SUCCESS;
         }else{
@@ -52,7 +52,7 @@ int imm_convert(char *file, char *bin){
         }
     }
     else if(!strcmp(bin1, "imm")){  // conversao de imm para txt, ou de imm para imm, a verificação da extensao do segundo arquivo ocorre dentro da funcao auxiliar;
-        i = segment_2_bin(file, bin, -1); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
+        i = segment_2_bin(file, bin, NULL_CODE); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
         if(!i){
             return SUCCESS;
         }else{
@@ -194,7 +194,7 @@ TImg *open_imm_file(char file[]){
     return img;
 }
 
-int segment_2_bin(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como -1, que não sofre limiarização;
+int segment_2_bin(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
     int v0 = 0, v1 = 1;
     char f[4];
     TImg *img;
@@ -219,7 +219,7 @@ int segment_2_bin(char *file, char *file2, int thr){ //esta funcao tambem é uti
     for(i = 0; i < lin; i++){   
         for(j = 0; j < col; j++){
             img_get_value(img, i, j, &value);
-            if(thr == -1){     // re-utilização de codigo, -1 é codigo nulo para o comando convert utilizar a mesma funcao sem sofrer limiarizacao;
+            if(thr == NULL_CODE){     // re-utilização de codigo, NULL_CODE é codigo nulo para o comando convert utilizar a mesma funcao sem sofrer limiarizacao;
                 fwrite(&value, sizeof(int), 1, bf);
             }else{
                 if(value > thr){   // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
@@ -235,7 +235,7 @@ int segment_2_bin(char *file, char *file2, int thr){ //esta funcao tambem é uti
     return SUCCESS;
 }
 
-int segment_2_txt(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como -1, que não sofre limiarização;
+int segment_2_txt(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
     char f[4];
     TImg *img;
     verify_format(file, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
@@ -257,7 +257,7 @@ int segment_2_txt(char *file, char *file2, int thr){ //esta funcao tambem é uti
     for(i = 0; i < lin; i++){   
         for(j = 0; j < col; j++){
             img_get_value(img, i, j, &value);
-            if(thr == -1){  // re-utilização de codigo, -1 é um codigo nulo para o comando convert utilizar a mesma funcao sem sofrer limiarizacao;
+            if(thr == NULL_CODE){  // re-utilização de codigo, NULL_CODE é um codigo nulo para o comando convert utilizar a mesma funcao sem sofrer limiarizacao;
                 fprintf(tf, "%d", value);
             }else{
                 if(value > thr){   // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
