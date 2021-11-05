@@ -64,20 +64,20 @@ int imm_convert(char *file, char *bin){
     }
 }
 
-int imm_segment(char *file, char *bin, int thr){
-    char file1[4];
+int imm_segment(char *file, char *file2, int thr){
+    char f[4];
     int i;
-    verify_format(file, file1);  // verificando o formato do primeiro arquivo, que servirá de base para limiarização;
+    verify_format(file2, f);  // verificando o formato do primeiro arquivo, que servirá de base para limiarização;
 
-    if(!strcmp(file1, "txt")){  // segmentacao de txt para txt, ou de txt para imm, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
-        i = segment_2_txt(file, bin, thr);
+    if(!strcmp(f, "txt")){  // segmentacao de txt para txt, ou de txt para imm, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
+        i = segment_2_txt(file, file2, thr);
         if(!i){
             return SUCCESS;
         }else{
             return INVALID_FORMAT_FILE;
         }
-    }else if(!strcmp(file1, "imm")){  // segmentacao de imm para imm, ou de imm para txt, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
-        i = segment_2_bin(file, bin, thr);
+    }else if(!strcmp(f, "imm")){  // segmentacao de imm para imm, ou de imm para txt, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
+        i = segment_2_bin(file, file2, thr);
         if(!i){
             return SUCCESS;
         }else{
