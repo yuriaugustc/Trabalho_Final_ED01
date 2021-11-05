@@ -249,32 +249,36 @@ int convert_txt_2_bin(char *file, char *bin, int thr){ // funcao nao esta em ple
 }
 
 int convert_bin_2_txt(char *bin, char *file, int thr){  // funcao nao esta em pleno funcionamento, verificar o que houve;
-    TImg *img = open_imm_file(bin);
+    TImg *img = open_imm_file(file);
     if(img == NULL){
         return INVALID_NULL_POINTER;
     }
-    FILE *tf = fopen(file, "w");
+    printf("lido");
+    FILE *tf = fopen(bin, "w");
     if(tf == NULL){
         return INVALID_NULL_POINTER;
     }
-    int value = 0, lin = 0, col = 0, i = 0, j = 0, k = 0;                 
-    lin = img_get_line(img);  // obtendo o numero de linhas do arquivo;
+    int value = 0, lin = 0, col = 0, i = 0, j = 0;                 
+    lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
     col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
     for(i = 0; i < lin; i++){   
         for(j = 0; j < col; j++){
             img_get_value(img, i, j, &value);
             if(thr == -1){  // re-utilização de codigo, -1 é um codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
-                fprintf(tf, "%d\t", value);
+                fprintf(tf, "%d", value);
             }else{
-                if(value > thr){  // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
-                    fprintf(tf, "1\t");    
+                if(value > thr){   // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
+                    fprintf(tf, "1");    
                 }
-                else{   // thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
-                    fprintf(tf, "0\t");
+                else{     // thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
+                    fprintf(tf, "0");
                 }
             }
+            if(j+1 != col)
+                fprintf(tf,"\t");
         }
-        fprintf(tf, "\n");
+        if(i+1 != lin)
+            fprintf(tf,"\n");
     }
     img_free(img); // desalocando o TADImg;
     fclose(tf);  // fechando o arquivo;
@@ -324,24 +328,27 @@ int segment_txt_2_txt(char *file, char *bin, int thr){
     if(tf == NULL){
         return INVALID_NULL_POINTER;
     }
-    int lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
-    int col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
-    int value = 0, i = 0, j = 0;                 
+    int value = 0, lin = 0, col = 0, i = 0, j = 0;                 
+    lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
+    col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
     for(i = 0; i < lin; i++){   
         for(j = 0; j < col; j++){
             img_get_value(img, i, j, &value);
             if(thr == -1){  // re-utilização de codigo, -1 é um codigo nulo para o comando open utilizar a mesma funcao sem sofrer limiarizacao;
-                fprintf(tf, "%d\t", value);
+                fprintf(tf, "%d", value);
             }else{
                 if(value > thr){   // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
-                    fprintf(tf, "1\t");    
+                    fprintf(tf, "1");    
                 }
                 else{     // thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
-                    fprintf(tf, "0\t");
+                    fprintf(tf, "0");
                 }
             }
+            if(j+1 != col)
+                fprintf(tf,"\t");
         }
-        fprintf(tf, "\n");
+        if(i+1 != lin)
+            fprintf(tf,"\n");
     }
     img_free(img); // desalocando o TADImg;
     fclose(tf);  // fechando o arquivo;

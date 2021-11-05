@@ -249,8 +249,9 @@ void img_print_matrix(TImg *mat){
            printf("\n");
            aux = 0;
         }
-        if(mat->data[i] >= 100)
+        if(mat->data[i] >= 100){
             printf("%d ", mat->data[i]);
+        }
         else if((mat->data[i] >= 10)&&(mat->data[i] < 100)){
             printf("%d  ", mat->data[i]);
         }

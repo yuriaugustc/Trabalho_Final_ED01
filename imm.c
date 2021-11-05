@@ -4,10 +4,10 @@
 
 int main(int argc, char *argv[]){
     //argv[0] = "imm";
-    //argv[1] = "-segment";
+    //argv[1] = "-convert";
     //argv[2] = "-10";
-    //argv[3] = "imagem.txt";
-    //argv[4] = "imagem.imm";
+    //argv[2] = "imagem.txt";
+    //argv[3] = "img.txt";
     if(!strcmp(argv[1], "-open")){
         if(argc == 2){
             printf("To use \"-open\" command you need to pass a file to open with that command.\n");
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
         return SUCCESS;
     }
     if(!strcmp(argv[1], "-help")){
-        printf("\t\t\t\t---- imm list commands -----\n\n");
+        printf("\t\t\t\t----- imm list commands -----\n\n");
         // -open;
         printf("imm -open : \t\t\t\t\t\t");
         printf("Open an image (text format or binary format) and show the pixels value on the screen.\n\n");
