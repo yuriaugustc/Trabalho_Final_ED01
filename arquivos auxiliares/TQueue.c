@@ -6,7 +6,7 @@ struct TQueue{
     QNode *head;
     QNode *end;
 };
-
+ 
 struct QNode{
     char data;
     QNode *next;

@@ -8,7 +8,7 @@
 #define ELEM_NOT_FOUND -4
 #define EMPTY_FILE -5
 #define INVALID_FORMAT_FILE -6
-
+ 
 int imm_open_file(char argv[]);
 int imm_convert(char *file, char *bin);
 int imm_segment(char *file, char *bin, int thr);

@@ -20,7 +20,7 @@ int stack_push(TStack *st, char al);
 int stack_pop(TStack *st);
 int stack_top(TStack *st, char *al);
 
-int stack_empty(TStack *st);
+int stack_empty(TStack *st); 
 int stack_full(TStack *st);
 int stack_print(TStack *st);
 int stack_size(TStack *st);

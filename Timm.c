@@ -135,7 +135,7 @@ void verify_format(char argv[], char aux[]){
     stack_free(st);
 }
 
-TImg *open_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
+TImg *open_txt_file(char file[]){ //funcao de abrir um arquivo de texto;
     FILE *tf;
     TImg *img;
     tf = fopen(file, "r");
@@ -247,7 +247,7 @@ int convert_txt_2_bin(char *file, char *bin, int thr){ // funcao nao esta em ple
     fclose(bf);  // fechando o arquivo;
     return SUCCESS;
 }
-
+ 
 int convert_bin_2_txt(char *bin, char *file, int thr){  // funcao nao esta em pleno funcionamento, verificar o que houve;
     TImg *img = open_imm_file(file);
     if(img == NULL){

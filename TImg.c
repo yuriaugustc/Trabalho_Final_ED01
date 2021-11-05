@@ -53,7 +53,7 @@ int img_set_value(TImg *mat, int i, int j, int val){
         return SUCCESS;
     }
 }
-
+ 
 /*  Descripition: This function return the value of requisited position;
  *  Input: (Matrix's pointer selected to inserction, line, column, (int) the value to overwrite);
  *  Output: the value of requisited position;

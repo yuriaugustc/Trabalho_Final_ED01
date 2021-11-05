@@ -7,7 +7,7 @@
 #define OUT_OF_RANGE -3
 #define ELEM_NOT_FOUND -4
 #define EMPTY_FILE -5
-
+ 
 typedef struct TImg TImg; 
 
 TImg *img_create(int nrows, int ncolumns);

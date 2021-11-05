@@ -72,7 +72,7 @@ int stack_empty(TStack *st){
             return NOT_EMPTY;
     }
 }
-
+ 
 int stack_full(TStack *st){
     if(st == NULL){
         return INVALID_NULL_POINTER;

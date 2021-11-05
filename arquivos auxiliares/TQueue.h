@@ -6,7 +6,7 @@
 #define OUT_OF_MEMORY -2
 #define EMPTY_QUEUE -3
 #define NOT_EMPTY -4
-
+ 
 typedef struct TQueue TQueue;
 typedef struct QNode QNode;
 
