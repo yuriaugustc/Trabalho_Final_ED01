@@ -13,7 +13,7 @@
 int imm_open_file(char argv[]);
 int imm_convert(char *file, char *bin);
 int imm_segment(char *file, char *bin, int thr);
-int imm_cc();
-int imm_lab();
+int imm_cc(char *file1, char *file2);
+int imm_lab(char *file1, char *file2);
 
 #endif
