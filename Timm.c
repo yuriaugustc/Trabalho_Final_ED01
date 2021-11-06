@@ -6,20 +6,20 @@
 #include "TStack.h"
 #include "Timm.h"
 
-void verify_format(char argv[], char aux[]);
-TImg *open_imm_file(char file[]);
-TImg *open_txt_file(char file[]);
-int segment_2_bin(char *file, char *bin, int thr);
-int segment_2_txt(char *file, char *bin, int thr);
-int write_binary(TImg *img, char *file);
-int write_text(TImg *img, char *file);
+void verify_format(char argv[], char aux[]); // função auxiliar de verificação de extensão;
+TImg *read_imm_file(char file[]); // função auxiliar de leitura de arquivos em formato imm;
+TImg *read_txt_file(char file[]); // função auxiliar de leitura de arquivos em formato txt;
+int segment_2_imm(char *file, char *bin, int thr); // funcção auxiliar de segmentação/conversão de arquivos imm;
+int segment_2_txt(char *file, char *bin, int thr); // funcção auxiliar de segmentação/conversão de arquivos txt;
+int write_imm(TImg *img, char *file); // função auxiliar de escrita em arquivos imm;
+int write_text(TImg *img, char *file); // função auxiliar de escrita em arquivos txt;
 
 int imm_open_file(char *argv){
     char aux[4];
     verify_format(argv, aux);
     TImg *img;
     if(!strcmp(aux, "txt")){
-        img = open_txt_file(argv); // criando a matriz a partir do arquivo.txt;
+        img = read_txt_file(argv); // criando a matriz a partir do arquivo.txt;
         if(img == NULL){
             return INVALID_NULL_POINTER;
         }
@@ -28,7 +28,7 @@ int imm_open_file(char *argv){
         return SUCCESS;
     }
     else if(!strcmp(aux, "imm")){
-        img = open_imm_file(argv); // criando a matriz a partir do arquivo.txt;
+        img = read_imm_file(argv); // criando a matriz a partir do arquivo.txt;
         if(img == NULL){
             return INVALID_NULL_POINTER;
         }
@@ -54,7 +54,7 @@ int imm_convert(char *file, char *bin){
         }
     }
     else if(!strcmp(bin1, "imm")){  // conversao de imm para txt, ou de imm para imm, a verificação da extensao do segundo arquivo ocorre dentro da funcao auxiliar;
-        i = segment_2_bin(file, bin, NULL_CODE); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
+        i = segment_2_imm(file, bin, NULL_CODE); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
         if(!i){
             return SUCCESS;
         }else{
@@ -79,7 +79,7 @@ int imm_segment(char *file, char *file2, int thr){
             return INVALID_FORMAT_FILE;
         }
     }else if(!strcmp(f, "imm")){  // segmentacao de imm para imm, ou de imm para txt, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
-        i = segment_2_bin(file, file2, thr);
+        i = segment_2_imm(file, file2, thr);
         if(!i){
             return SUCCESS;
         }else{
@@ -133,7 +133,7 @@ void verify_format(char argv[], char aux[]){
     stack_free(st);
 }
 
-TImg *open_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
+TImg *read_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
     FILE *tf;
     TImg *img;
     tf = fopen(file, "r");
@@ -188,7 +188,7 @@ TImg *open_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
     return img;
 }
 
-TImg *open_imm_file(char file[]){ 
+TImg *read_imm_file(char file[]){ 
     FILE *bf;
     bf = fopen(file, "rb");
     if(bf == NULL){
@@ -212,14 +212,14 @@ TImg *open_imm_file(char file[]){
     return img;
 }
 
-int segment_2_bin(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
+int segment_2_imm(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
     char f[4];
     TImg *img, *aux;
     verify_format(file, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
     if(!strcmp(f, "txt")){  // caso de conversao/segmentacao de imm para txt;
-        img = open_txt_file(file);
+        img = read_txt_file(file);
     }else if(!strcmp(f, "imm")){   // caso de conversao/segmentacao de imm para imm;
-        img = open_imm_file(file);
+        img = read_imm_file(file);
     }
     if(img == NULL){
         return INVALID_NULL_POINTER;
@@ -245,7 +245,7 @@ int segment_2_bin(char *file, char *file2, int thr){ //esta funcao tambem é uti
             }
         }
     }
-    write_binary(aux, file2); // funcao modularizada de escrita em arquivo binario;
+    write_imm(aux, file2); // funcao modularizada de escrita em arquivo binario;
     img_free(aux);  // desalocando o TADImg auxiliar;
     img_free(img); // desalocando o TADImg;
     return SUCCESS;
@@ -256,9 +256,9 @@ int segment_2_txt(char *file, char *file2, int thr){ //esta funcao tambem é uti
     TImg *img, *aux;
     verify_format(file, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
     if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
-        img = open_txt_file(file);
+        img = read_txt_file(file);
     }else if(!strcmp(f, "imm")){   // caso de segmentacao de txt para imm;
-        img = open_imm_file(file);
+        img = read_imm_file(file);
     }
     if(img == NULL){
         return INVALID_NULL_POINTER;
@@ -288,7 +288,7 @@ int segment_2_txt(char *file, char *file2, int thr){ //esta funcao tambem é uti
     return SUCCESS;
 }
 
-int write_binary(TImg *img, char *file){ // funcao modularizada de escrita em arquivo binario
+int write_imm(TImg *img, char *file){ // funcao modularizada de escrita em arquivo binario
     if(img == NULL){
         return INVALID_NULL_POINTER;
     }
