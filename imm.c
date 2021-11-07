@@ -3,11 +3,11 @@
 #include "Timm.h"
 
 int main(int argc, char *argv[]){
-    //argv[0] = "imm";
-    //argv[1] = "-convert";
+    argv[0] = "imm";
+    argv[1] = "-cc";
     //argv[2] = "-10";
-    //argv[2] = "img.imm";
-    //argv[3] = "img.txt";
+    argv[2] = "cc.txt";
+    argv[3] = "cced.txt";
     if(!strcmp(argv[1], "-open")){
         if(argc == 2){
             printf("To use \"-open\" command you need to pass a file to open with that command.\n");
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
         }else{
             int i = imm_cc(argv[2], argv[3]);
             if(!i){
-                printf("The file was be segmented with success. Please check later for truly confimartion.\n");
+                printf("The file was be created with success. Please check later for truly confimartion.\n");
             }
             else{
                 printf("Something went wrong. Please check the file integrity and try again.\n");
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]){
         }else{
             int i = imm_lab(argv[2], argv[3]);
             if(!i){
-                printf("The file was be segmented with success. Please check later for truly confimartion.\n");
+                printf("The file was be created with success. Please check later for truly confimartion.\n");
             }
             else{
                 printf("Something went wrong. Please check the file integrity and try again.\n");
