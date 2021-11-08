@@ -432,7 +432,7 @@ int lab_escape(char *file1, char *file2){
     if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro;
         return INVALID_NULL_POINTER;
     }
-    int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, k = 1, label = 2, val = 0, ex = 0;
+    int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, k = 1, label = 2, val = 0;
     int v1 = 0, v2 = 0, v3 = 0, v4 = 0; // variáveis auxiliares para receber valor das posições vizinhas ao ponto em analise;                 
     lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
     col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
@@ -443,17 +443,16 @@ int lab_escape(char *file1, char *file2){
     }  
     for(i = 0; i < lin; i++){   // este for funciona verificando verticalmente a imagem, imagino que seja o caminho mais facil;
         img_get_value(img, i, j, &value);
-        img_get_value(lab, i, j, &value2);
         if(value == 1){
             pt.i = i;
             pt.j = j;
             img_set_value(lab, i, j, label);
             stckpt_push(labesc, pt);
-            while(val != EMPTY_LIST){ // variavel "val" auxiliar para verificar se a pilha esta vazia ou nao;
+            while(val != EMPTY_LIST){ // variavel "a" auxiliar para verificar se a pilha esta vazia ou nao;
                 val = stckpt_top(labesc, &pt2);
                 val = stckpt_pop(labesc);
                 while(k != -2){
-                    v1 = 0; v2 = 0; v3 = 0; v4 = 0;
+                    v1 = 0; v2 = 0; v3 = 0; v4 = 0; 
                     img_get_value(img, (pt2.i)+k, pt2.j, &v1); // verifica os vizinhos horizontais na imagem orignal;
                     img_get_value(lab, (pt2.i)+k, pt2.j, &v2); // verifica os vizinhos horizontais na imagem rotulada;
                     img_get_value(img, pt2.i, (pt2.j)+k, &v3); // verifica os vizinhos verticais na imagem orignal;
@@ -467,34 +466,25 @@ int lab_escape(char *file1, char *file2){
                         pt2.j += k;
                         img_set_value(lab, pt2.i, pt2.j, label);
                         stckpt_push(labesc, pt2);
-                    }
-                    if(pt2.j == col-1){
-                        ex = 1;
-                        break;
-                    }
+                    }//else{ // trabalhar neste else, muito proximo de conseguir resolver o lab;
+                     //   img_set_value(img, pt2.i, pt2.j, 0);
+                     //   img_set_value(lab, pt2.i, pt2.j, 0); //apaga onde ele entrou em um beco sem saida; (o problema é que ele apaga a bifurcação tambem);
+                    //}
                     k--;
                     if(k == 0){ // somando novamente a variavel k, para que o laço não acesse a posição em que já estamos trabalhando;
                         k--;
                     }
                 } // while
                 k = 1;
-                if(ex == 1){
-                    while(val != EMPTY_LIST){
-                        val = stckpt_top(labesc, &pt2);
-                        val = stckpt_pop(labesc);
-                        img_set_value(esc_lab, pt2.i, pt2.j, label);
-                    }
-                    break;
-                }
             } // while
         } // if
     }
     char f2[4];
     verify_format(file2, f2);
     if(!strcmp(f2, "txt")){
-        write_text(esc_lab, file2);
+        write_text(lab, file2);
     }else if(!strcmp(f2, "imm")){
-        write_imm(esc_lab, file2);
+        write_imm(lab, file2);
     }
     else{
         return INVALID_FORMAT_FILE;
