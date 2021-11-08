@@ -7,6 +7,7 @@
 #include "TStckpt.h"
 #include "Timm.h"
 
+// declaração das funções auxiliares (por questões de organização, optei por manter as funções auxiliares ao fim do código)
 void verify_format(char argv[], char aux[]); // função auxiliar de verificação de extensão;
 TImg *read_imm_file(char file[]); // função auxiliar de leitura de arquivos em formato imm;
 TImg *read_txt_file(char file[]); // função auxiliar de leitura de arquivos em formato txt;
@@ -16,6 +17,8 @@ int write_imm(TImg *img, char *file); // função auxiliar de escrita em arquivo
 int write_text(TImg *img, char *file); // função auxiliar de escrita em arquivos txt;
 int find_cc(char *file1, char *file2); // função auxiliar para localização de componentes conexos de uma imagem;
 int lab_escape(char *file1, char *file2); // função auxiliar para localização da saída de uma imagem-labirinto;
+
+// início das funções primárias
 
 int imm_open_file(char *argv){
     char aux[4];
@@ -96,7 +99,6 @@ int imm_segment(char *file, char *file2, int thr){
 }
 
 int imm_cc(char *file1, char *file2){
-    char f[4];
     int i = find_cc(file1, file2);
     if(!i){
         return SUCCESS;
@@ -106,17 +108,15 @@ int imm_cc(char *file1, char *file2){
 }
 
 int imm_lab(char *file1, char *file2){
-    char f[4];
-    int i;
-    verify_format(file1, f);
-    if(!strcmp(f, "txt")){
-
-    } else if(!strcmp(f, "imm")){
-
+    int i = lab_escape(file1, file2);
+    if(!i){
+        return SUCCESS;
+    }else{
+        return INVALID_FORMAT_FILE;
     }
-    printf("Okay, -lab labindo fora da main ;w;\n");
-    return 0;
 }
+
+//  inicio das funções auxiliares;
 
 void verify_format(char argv[], char aux[]){
     TStack *st;
@@ -402,26 +402,26 @@ int find_cc(char *file1, char *file2){
             } // if
         }
     }
-    char f2[4];
-    verify_format(file2, f2);
+    char f2[4]; 
+    verify_format(file2, f2);   // verificação do formato especificado no arquivo de saida para fazer a escrita;
     if(!strcmp(f2, "txt")){
-        write_text(rot, file2);
+        write_text(rot, file2); // caso de escrita em arquivo texto;
     }else if(!strcmp(f2, "imm")){
-        write_imm(rot, file2);
+        write_imm(rot, file2);  // caso de escrita em arquivo binário;
     }
     else{
         return INVALID_FORMAT_FILE;
     }
-    stckpt_free(cc);
-    img_free(img);
-    img_free(rot);
+    stckpt_free(cc); // desalocando a pilha utilizada;
+    img_free(img);  // desalocando a imagem original utilizada;
+    img_free(rot);  // desalocando a imagem rotulada utilizada;
     return SUCCESS;
 }
 
-/*int lab_escape(char *file1, char *file2){
+int lab_escape(char *file1, char *file2){
     char f[4];
-    TImg *img, *lab;
-    TStckpt *labesc = stckpt_create();
+    TImg *img, *lab, *esc_lab;
+    TStckpt *labesc = stckpt_create(), *aux = stckpt_create();
     point pt, pt2;
     verify_format(file1, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
     if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
@@ -432,58 +432,69 @@ int find_cc(char *file1, char *file2){
     if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro;
         return INVALID_NULL_POINTER;
     }
-    int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, k = 1, label = 1, a = 0;
+    int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, k = 1, label = 2, val = 0, ex = 0;
     int v1 = 0, v2 = 0, v3 = 0, v4 = 0; // variáveis auxiliares para receber valor das posições vizinhas ao ponto em analise;                 
     lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
     col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
     lab = img_create(lin, col); // meu image_create já zera as posições por padrão;
+    esc_lab = img_create(lin, col);
     if(lab == NULL){
         return INVALID_NULL_POINTER;
-    }
-    for(j = 0; j < col; j++){   
-        for(i = 0; i < lin; i++){
-            img_get_value(img, i, j, &value);
-            //img_get_value(lab, i, j, &value2);
-            if(value == 1 && value2 == 0){
-                pt.i = i;
-                pt.j = j;
-                img_set_value(lab, i, j, label);
-                stckpt_push(labesc, pt);
-                while(a != EMPTY_LIST){ // variavel "a" auxiliar para verificar se a pilha esta vazia ou nao;
-                    a = stckpt_top(labesc, &pt2);
-                    a = stckpt_pop(labesc);
-                    while(k != -2){
-                        img_get_value(img, (pt2.i)+k, pt2.j, &v1); // verifica os vizinhos horizontais na imagem orignal;
-                        img_get_value(lab, (pt2.i)+k, pt2.j, &v2); // verifica os vizinhos horizontais na imagem rotulada;
-                        img_get_value(img, pt2.i, (pt2.j)+k, &v3); // verifica os vizinhos verticais na imagem orignal;
-                        img_get_value(lab, pt2.i, (pt2.j)+k, &v4); // verifica os vizinhos verticais na imagem rotulada;
-                        if(v1 == 1 && v2 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
-                            pt2.i += k;
-                            img_set_value(lab, pt2.i, pt2.j, label);
-                            stckpt_push(labesc, pt2);
-                        }
-                        if(v3 == 1 && v4 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
-                            pt2.j += k;
-                            img_set_value(lab, pt2.i, pt2.j, label);
-                            stckpt_push(labesc, pt2);
-                        }
+    }  
+    for(i = 0; i < lin; i++){   // este for funciona verificando verticalmente a imagem, imagino que seja o caminho mais facil;
+        img_get_value(img, i, j, &value);
+        img_get_value(lab, i, j, &value2);
+        if(value == 1){
+            pt.i = i;
+            pt.j = j;
+            img_set_value(lab, i, j, label);
+            stckpt_push(labesc, pt);
+            while(val != EMPTY_LIST){ // variavel "val" auxiliar para verificar se a pilha esta vazia ou nao;
+                val = stckpt_top(labesc, &pt2);
+                val = stckpt_pop(labesc);
+                while(k != -2){
+                    v1 = 0; v2 = 0; v3 = 0; v4 = 0;
+                    img_get_value(img, (pt2.i)+k, pt2.j, &v1); // verifica os vizinhos horizontais na imagem orignal;
+                    img_get_value(lab, (pt2.i)+k, pt2.j, &v2); // verifica os vizinhos horizontais na imagem rotulada;
+                    img_get_value(img, pt2.i, (pt2.j)+k, &v3); // verifica os vizinhos verticais na imagem orignal;
+                    img_get_value(lab, pt2.i, (pt2.j)+k, &v4); // verifica os vizinhos verticais na imagem rotulada;
+                    if(v1 == 1 && v2 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                        pt2.i += k;
+                        img_set_value(lab, pt2.i, pt2.j, label);
+                        stckpt_push(labesc, pt2);
+                    }
+                    if(v3 == 1 && v4 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                        pt2.j += k;
+                        img_set_value(lab, pt2.i, pt2.j, label);
+                        stckpt_push(labesc, pt2);
+                    }
+                    if(pt2.j == col-1){
+                        ex = 1;
+                        break;
+                    }
+                    k--;
+                    if(k == 0){ // somando novamente a variavel k, para que o laço não acesse a posição em que já estamos trabalhando;
                         k--;
-                        if(k == 0){ // somando novamente a variavel k, para que o laço não acesse a posição em que já estamos trabalhando;
-                            k--;
-                        }
-                    } // while
-                    k = 1;
+                    }
                 } // while
-                label++;
-            } // if
-        }
+                k = 1;
+                if(ex == 1){
+                    while(val != EMPTY_LIST){
+                        val = stckpt_top(labesc, &pt2);
+                        val = stckpt_pop(labesc);
+                        img_set_value(esc_lab, pt2.i, pt2.j, label);
+                    }
+                    break;
+                }
+            } // while
+        } // if
     }
     char f2[4];
     verify_format(file2, f2);
     if(!strcmp(f2, "txt")){
-        write_text(lab, file2);
+        write_text(esc_lab, file2);
     }else if(!strcmp(f2, "imm")){
-        write_imm(lab, file2);
+        write_imm(esc_lab, file2);
     }
     else{
         return INVALID_FORMAT_FILE;
@@ -491,5 +502,6 @@ int find_cc(char *file1, char *file2){
     stckpt_free(labesc);
     img_free(img);
     img_free(lab);
+    img_free(esc_lab);
     return SUCCESS;
-}*/
+}

@@ -10,7 +10,7 @@ struct TStckpt{
 TStckpt *stckpt_create(){
     TStckpt *st = malloc(sizeof(TStckpt));
         st->qtd = 0;
-        st->max = 100;
+        st->max = 500;
         st->pt = malloc(st->max*sizeof(point));
         if (st->pt == NULL){
             free(st);

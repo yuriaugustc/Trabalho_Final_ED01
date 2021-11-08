@@ -17,15 +17,12 @@ TImg *img_create(int nrows, int ncolumns){
     if(nrows <= 0 || ncolumns <= 0){
         return NULL;
     }
-    TImg *mat;
-    mat = (TImg*) malloc(sizeof(TImg));
+    TImg *mat = malloc(sizeof(TImg));
     if (mat != NULL){
-        mat->data = malloc(nrows*ncolumns*sizeof(int));
+        mat->data = calloc(nrows*ncolumns,sizeof(int));
         if (mat->data != NULL){
             mat->ncolumns = ncolumns;
             mat->nrows = nrows;
-            for(int i = 0; i < (ncolumns*nrows); i++)
-                mat->data[i] = 0;
         } else {
             free(mat);
             return NULL;
@@ -62,6 +59,8 @@ int img_get_value(TImg *mat, int i, int j, int *val){
     if(mat == NULL){
         return INVALID_NULL_POINTER;
     }
+    if(i < 0 || j < 0)
+        return OUT_OF_RANGE;
     else{
         int aux = (i * mat->ncolumns) + j;
         *val = mat->data[aux];
