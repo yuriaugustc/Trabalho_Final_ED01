@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include "TImg.h"
+#include "TQueue.h"
 #include "TStack.h"
 #include "TStckpt.h"
 #include "Timm.h"
@@ -118,7 +119,7 @@ int imm_lab(char *file1, char *file2){
 
 //  inicio das funções auxiliares;
 
-void verify_format(char argv[], char aux[]){
+void verify_format(char *argv, char *aux){
     TStack *st;
     st = stack_create();
     for(int i = 0; i < strlen(argv); i++){
@@ -132,7 +133,7 @@ void verify_format(char argv[], char aux[]){
     stack_free(st);
 }
 
-TImg *read_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
+TImg *read_txt_file(char *file){ // funcao de abrir um arquivo de texto;
     FILE *tf;
     TImg *img;
     tf = fopen(file, "r");
@@ -187,7 +188,7 @@ TImg *read_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
     return img;
 }
 
-TImg *read_imm_file(char file[]){ 
+TImg *read_imm_file(char *file){ 
     FILE *bf;
     bf = fopen(file, "rb");
     if(bf == NULL){
