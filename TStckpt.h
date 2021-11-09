@@ -21,7 +21,6 @@ typedef struct point point;
 
 TStckpt *stckpt_create();
 int stckpt_free(TStckpt *st);
-
 int stckpt_push(TStckpt *st, point pt);
 int stckpt_pop(TStckpt *st);
 int stckpt_top(TStckpt *st, point *pt);

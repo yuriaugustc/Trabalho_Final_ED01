@@ -20,8 +20,9 @@ TStckpt *stckpt_create(){
 }
 
 int stckpt_realloc(TStckpt *st){
-    if(st == NULL)
+    if(st == NULL){
         return INVALID_NULL_POINTER;
+    }
     else{
         TStckpt *aux = malloc(sizeof(TStckpt));
         aux->pt = malloc(aux->max*2*sizeof(point));
