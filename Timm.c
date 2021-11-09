@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 #include "TImg.h"
-#include "TQueue.h"
 #include "TStack.h"
 #include "TStckpt.h"
 #include "Timm.h"
