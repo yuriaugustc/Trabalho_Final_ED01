@@ -3,11 +3,7 @@
 #include "Timm.h"
 
 int main(int argc, char *argv[]){
-    // argv[0] = "imm";
-    // argv[1] = "-cc";
-    //argv[2] = "-10";
-    // argv[2] = "cc.txt";
-    // argv[3] = "cced.txt";
+    
     if(!strcmp(argv[1], "-open")){
         if(argc == 2){
             printf("To use \"-open\" command you need to pass a file to open with that command.\n");
