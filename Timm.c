@@ -11,10 +11,9 @@
 void verify_format(char argv[], char aux[]); // função auxiliar de verificação de extensão;
 TImg *read_imm_file(char file[]); // função auxiliar de leitura de arquivos em formato imm;
 TImg *read_txt_file(char file[]); // função auxiliar de leitura de arquivos em formato txt;
-int segment_2_imm(char *file, char *bin, int thr); // funcção auxiliar de segmentação/conversão de arquivos imm;
-int segment_2_txt(char *file, char *bin, int thr); // funcção auxiliar de segmentação/conversão de arquivos txt;
 int write_imm(TImg *img, char *file); // função auxiliar de escrita em arquivos imm;
 int write_text(TImg *img, char *file); // função auxiliar de escrita em arquivos txt;
+int seg_conv_2(char *file, char *bin, int thr); // função auxiliar de segmentação/conversão de arquivos imm/txt;
 int find_cc(char *file1, char *file2); // função auxiliar para localização de componentes conexos de uma imagem;
 int lab_escape(char *file1, char *file2); // função auxiliar para localização da saída de uma imagem-labirinto;
 
@@ -49,53 +48,22 @@ int imm_open_file(char *argv){
 
 int imm_convert(char *file, char *bin){
     char bin1[4];
-    int i;
-    verify_format(bin, bin1); // verificação da extensao do primeiro arquivo;
-    if(!strcmp(bin1, "txt")){   // conversao de imm para txt, ou de txt para txt, a verificação da extensao do segundo arquivo ocorre dentro da funcao auxiliar;
-        i = segment_2_txt(file, bin, NULL_CODE); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
-        if(!i){
-            return SUCCESS;
-        }else{
-            return INVALID_FORMAT_FILE;
-        }
-    }
-    else if(!strcmp(bin1, "imm")){  // conversao de imm para txt, ou de imm para imm, a verificação da extensao do segundo arquivo ocorre dentro da funcao auxiliar;
-        i = segment_2_imm(file, bin, NULL_CODE); // esta função está com nome de "segment" pois a função foi modularizada de forma a evitar repetição de codigo dentro do programa;
-        if(!i){
-            return SUCCESS;
-        }else{
-            return INVALID_FORMAT_FILE;
-        }
-    }
-    else{
+    int i = seg_conv_2(file, bin, NULL_CODE); 
+    if(!i){
+        return SUCCESS;
+    }else{
         return INVALID_FORMAT_FILE;
     }
 }
 
 int imm_segment(char *file, char *file2, int thr){
     char f[4];
-    int i;
-    verify_format(file2, f);  // verificando o formato do primeiro arquivo, que servirá de base para limiarização;
-
-    if(!strcmp(f, "txt")){  // segmentacao de txt para txt, ou de txt para imm, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
-        i = segment_2_txt(file, file2, thr);
-        if(!i){
-            return SUCCESS;
-        }else{
-            return INVALID_FORMAT_FILE;
-        }
-    }else if(!strcmp(f, "imm")){  // segmentacao de imm para imm, ou de imm para txt, a verificação da extensao do segundo arquivo ocorre na função auxiliar;
-        i = segment_2_imm(file, file2, thr);
-        if(!i){
-            return SUCCESS;
-        }else{
-            return INVALID_FORMAT_FILE;
-        }
-    }
-    else{
+    int i = seg_conv_2(file, file2, thr);
+    if(!i){
+        return SUCCESS;
+    }else{
         return INVALID_FORMAT_FILE;
     }
-    return SUCCESS;
 }
 
 int imm_cc(char *file1, char *file2){ 
@@ -161,12 +129,11 @@ TImg *read_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
     p = '0';  // setando a variavel com zero para que a ultima leitura da variavel nao interfira no funcionamento do codigo;    
     while(p != EOF){  // o while verifica primeiro e depois lê o caractere;
         p = fgetc(tf);
-        
         if((p != '\t' && p != EOF && p != '\n')){ // casos onde se leu caracteres de pixel;
             value[val] = p;
             val++;
         }
-        if((p == '\t' || p == EOF || p == '\n')){ // casos onde foi encontrado o espaçamento de pixel, ou o fim do arquivo, o caso de EOF é verificado pois o ultimo pixel ficaria sem ser setado caso contrario ( ler comentario ao lado do while);
+        else if((p == '\t' || p == EOF || p == '\n')){ // casos onde foi encontrado o espaçamento de pixel, ou o fim do arquivo, o caso de EOF é verificado pois o ultimo pixel ficaria sem ser setado caso contrario ( ler comentario ao lado do while);
             if(val == 3 || val == 4){
                 v1 = value[0] - '0'; v2 = value[1] - '0'; v3 = value[2] - '0';  // casos onde se leu 3 caracteres de pixel;
             }
@@ -176,11 +143,11 @@ TImg *read_txt_file(char file[]){ // funcao de abrir um arquivo de texto;
             else if(val == 1){
                 v1 = 0; v2 = 0; v3 = value[0] - '0'; // casos onde se leu apenas 1 caractere de pixel;
             }
-            v4 = (v1*100) + (v2*10) + (v3*1); // os pixels foram lidos como caractere, então deve-se convertê-los novamente ao seu valor de acordo com a casa decimal;            
+            v4 = (v1*100) + (v2*10) + v3; // os pixels foram lidos como caractere, então deve-se convertê-los novamente ao seu valor de acordo com a casa decimal;            
             img_set_value(img, i, j, v4);
             val = 0;
             value[0] = '0'; value[1] = '0'; value[2] = '0';  // zerando o vetor novamente para que o proximo pixel nao seja afetado(casos onde o pixel possui valor menor à 100, por exemplo);
-            j++;
+            j++; // incrementando as colunas;
         }
     }
     fclose(tf);
@@ -259,7 +226,7 @@ int write_text(TImg *img, char *file){ // funcao modularizada de escrita em arqu
     return SUCCESS;
 }
 
-int segment_2_imm(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
+int seg_conv_2(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
     char f[4];
     TImg *img = NULL, *aux = NULL;
     verify_format(file, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
@@ -278,9 +245,6 @@ int segment_2_imm(char *file, char *file2, int thr){ //esta funcao tambem é uti
     if(aux == NULL){
         return INVALID_NULL_POINTER;
     }
-    if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro;
-        return INVALID_NULL_POINTER;
-    }
     for(i = 0; i < lin; i++){   
         for(j = 0; j < col; j++){
             img_get_value(img, i, j, &value);
@@ -295,48 +259,13 @@ int segment_2_imm(char *file, char *file2, int thr){ //esta funcao tambem é uti
             }
         }
     }
-    write_imm(aux, file2); // funcao modularizada de escrita em arquivo binario;
+    char f2[4];
+    verify_format(file2, f2);
+    if(!strcmp(f2, "imm"))
+        write_imm(aux, file2);
+    else if(!strcmp(f2, "txt"))
+        write_text(aux, file2);
     img_free(aux);  // desalocando o TADImg auxiliar;
-    img_free(img); // desalocando o TADImg;
-    return SUCCESS;
-}
-
-int segment_2_txt(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
-    char f[4];
-    TImg *img = NULL, *aux = NULL;
-    verify_format(file, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
-    if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
-        img = read_txt_file(file);
-    }else if(!strcmp(f, "imm")){   // caso de segmentacao de txt para imm;
-        img = read_imm_file(file);
-    }
-    if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro; //
-        return INVALID_NULL_POINTER;
-    }
-    int value = 0, lin = 0, col = 0, i = 0, j = 0;                 
-    lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
-    col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
-    aux = img_create(lin, col);
-    if(aux == NULL){
-        return INVALID_NULL_POINTER;
-    }
-    for(i = 0; i < lin; i++){   
-        for(j = 0; j < col; j++){
-            img_get_value(img, i, j, &value);
-            if(thr == NULL_CODE){  // re-utilização de codigo, NULL_CODE é um codigo nulo para o comando convert utilizar a mesma funcao sem sofrer limiarizacao;
-                img_set_value(aux, i, j, value);
-            }else{
-                if(value > thr){   // thresholding : se é maior que thr, acessa o endereco de uma variavel com valor 1 e escreve no arquivo;
-                    img_set_value(aux, i, j, 1);    
-                }
-                else{     // thresholding : se é menor que thr, acessa o endereco de uma variavel com valor 0 e escreve no arquivo;
-                    img_set_value(aux, i, j, 0);
-                }
-            }
-        }
-    }
-    write_text(aux, file2);
-    img_free(aux);
     img_free(img); // desalocando o TADImg;
     return SUCCESS;
 }
