@@ -6,9 +6,9 @@
 #define OUT_OF_MEMORY -2
 #define EMPTY_QUEUE -3
 #define NOT_EMPTY -4
+#define FULL_QUEUE -5
  
 typedef struct TQueue TQueue;
-typedef struct QNode QNode;
 
 TQueue *queue_create();
 int queue_free(TQueue *st);
