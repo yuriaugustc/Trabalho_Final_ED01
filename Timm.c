@@ -290,8 +290,8 @@ int find_cc(char *file1, char *file2){
     if((strcmp(f2, "txt"))&&(strcmp(f2, "imm"))){ // se houver divergencias entre a extensao, entrara nessa if e gerará erro;
         return INVALID_FORMAT_FILE;
     }
-    int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, k = 1, label = 1, a = 0;
-    int esq = 0, dir = 0, cima = 0, baixo = 0, v1 = 0, v2 = 0, v3 = 0, v4 = 0, it = 0; // variáveis auxiliares para receber valor das posições vizinhas ao ponto em analise;                 
+    int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, label = 1, a = 0;
+    int esq = 0, dir = 0, cima = 0, baixo = 0, v1 = 0, v2 = 0, v3 = 0, v4 = 0; // variáveis auxiliares para receber valor das posições vizinhas ao ponto em analise;                 
     lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
     col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
     rot = img_create(lin, col); // meu image_create já zera as posições por padrão;
