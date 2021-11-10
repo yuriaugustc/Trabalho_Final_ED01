@@ -227,9 +227,9 @@ int write_text(TImg *img, char *file){ // funcao modularizada de escrita em arqu
 }
 
 int seg_conv_2(char *file, char *file2, int thr){ //esta funcao tambem é utilizada na convert, com um valor thr de limiarização nulo, definido como NULL_CODE, que não sofre limiarização;
-    char f[4];
+    char f[4], f2[4];
     TImg *img = NULL, *aux = NULL;
-    verify_format(file, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
+    verify_format(file, f);  // verificando o formato do arquivo de entrada para utilizar a função de leitura correta;
     if(!strcmp(f, "txt")){  // caso de conversao/segmentacao de imm para txt;
         img = read_txt_file(file);
     }else if(!strcmp(f, "imm")){   // caso de conversao/segmentacao de imm para imm;
@@ -237,6 +237,10 @@ int seg_conv_2(char *file, char *file2, int thr){ //esta funcao tambem é utiliz
     }
     if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro;
         return INVALID_NULL_POINTER;
+    }
+    verify_format(file2, f2); // verificação do formato do arquivo à ser criado, caso seja divergente, não perde tempo na função;
+    if((strcmp(f2, "txt"))&&(strcmp(f2, "imm"))){ // se houver divergencias entre a extensao, entrara nessa if e gerará erro;
+        return INVALID_FORMAT_FILE;
     }
     int lin = 0, col = 0, value = 0, i = 0, j = 0;  // criando variaveis auxiliares de linha e colunas pois a originais estao sendo usadas no for aninhado;                 
     lin = img_get_line(img);  // obtendo o numero de linhas do arquivo;
@@ -259,8 +263,6 @@ int seg_conv_2(char *file, char *file2, int thr){ //esta funcao tambem é utiliz
             }
         }
     }
-    char f2[4];
-    verify_format(file2, f2);
     if(!strcmp(f2, "imm"))
         write_imm(aux, file2);
     else if(!strcmp(f2, "txt"))
@@ -271,11 +273,11 @@ int seg_conv_2(char *file, char *file2, int thr){ //esta funcao tambem é utiliz
 }
 
 int find_cc(char *file1, char *file2){
-    char f[4];
+    char f[4], f2[4];
     TImg *img = NULL, *rot = NULL; // img de imagem original, rot de imagem rotulada;
     TStckpt *cc = stckpt_create();
-    point pt;
-    verify_format(file1, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
+    point pt, pt2;
+    verify_format(file1, f);  // verificando o formato do arquivo de entrada para utilizar a função de leitura correta;
     if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
         img = read_txt_file(file1);
     }else if(!strcmp(f, "imm")){   // caso de segmentacao de txt para imm;
@@ -283,9 +285,13 @@ int find_cc(char *file1, char *file2){
     }
     if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro;
         return INVALID_NULL_POINTER;
+    } 
+    verify_format(file2, f2);   // verificação do formato do arquivo à ser criado, caso seja divergente, não perde tempo na função;
+    if((strcmp(f2, "txt"))&&(strcmp(f2, "imm"))){ // se houver divergencias entre a extensao, entrara nessa if e gerará erro;
+        return INVALID_FORMAT_FILE;
     }
     int value = 0, value2 = 0, lin = 0, col = 0, i = 0, j = 0, k = 1, label = 1, a = 0;
-    int v1 = 0, v2 = 0, v3 = 0, v4 = 0; // variáveis auxiliares para receber valor das posições vizinhas ao ponto em analise;                 
+    int esq = 0, dir = 0, cima = 0, baixo = 0, v1 = 0, v2 = 0, v3 = 0, v4 = 0, it = 0; // variáveis auxiliares para receber valor das posições vizinhas ao ponto em analise;                 
     lin = img_get_line(img);   // obtendo o numero de linhas do arquivo;
     col = img_get_columns(img); // obtendo o numero de colunas do arquivo;
     rot = img_create(lin, col); // meu image_create já zera as posições por padrão;
@@ -303,41 +309,50 @@ int find_cc(char *file1, char *file2){
                 stckpt_push(cc, pt);
                 while(a != EMPTY_LIST){ // variavel "a" auxiliar para verificar se a pilha esta vazia ou nao;
                     a = stckpt_top(cc, &pt);
-                    //a = stckpt_pop(cc);
-                    while(k != -3){
-                        img_get_value(img, (pt.i)+k, pt.j, &v1); // verifica os vizinhos horizontais na imagem orignal;
-                        img_get_value(rot, (pt.i)+k, pt.j, &v2); // verifica os vizinhos horizontais na imagem rotulada;
-                        img_get_value(img, pt.i, (pt.j)+k, &v3); // verifica os vizinhos verticais na imagem orignal;
-                        img_get_value(rot, pt.i, (pt.j)+k, &v4); // verifica os vizinhos verticais na imagem rotulada;
-                        if((v1 == 1 && v2 == 0)||(v3 == 1 && v4 == 0)){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
-                            if(v1 == 1)
-                                pt.i += k;
-                            else if(v3 == 1)
-                                pt.j += k;
-                            img_set_value(rot, pt.i, pt.j, label);
-                            stckpt_push(cc, pt);
+                    a = stckpt_pop(cc);
+                        img_get_value(img, (pt.i)-1, pt.j, &cima); // verifica os vizinhos acima na imagem original;
+                        img_get_value(rot, (pt.i)-1, pt.j, &v1); // verifica os vizinhos acima na imagem rotulada;
+                        img_get_value(img, pt.i, (pt.j)-1, &esq); // verifica os vizinhos à esquerda na imagem original;
+                        img_get_value(rot, pt.i, (pt.j)-1, &v2); // verifica os vizinhos à esquerda na imagem rotulada;
+                        img_get_value(img, (pt.i)+1, pt.j, &baixo); // verifica os vizinhos abaixo na imagem original;
+                        img_get_value(rot, (pt.i)+1, pt.j, &v3); // verifica os vizinhos abaixo na imagem rotulada;
+                        img_get_value(img, pt.i, (pt.j)+1, &dir); // verifica os vizinhos à direita na imagem original;
+                        img_get_value(rot, pt.i, (pt.j)+1, &v4); // verifica os vizinhos à direita na imagem rotulada;
+                        if(cima == 1 && v1 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                            pt2.i = (pt.i)-1;
+                            pt2.j = pt.j;
+                            img_set_value(rot, pt2.i, pt2.j, label);
+                            stckpt_push(cc, pt2);
                         }
-                        else{
-                            stckpt_pop(cc);
+                        if(dir == 1 && v4 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                            pt2.i = pt.i;
+                            pt2.j = (pt.j)+1;
+                            img_set_value(rot, pt2.i, pt2.j, label);
+                            stckpt_push(cc, pt2);
                         }
-                        k-=2;
-                    } // while
-                    k = 1;
+                        if(baixo == 1 && v3 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                            pt2.i = (pt.i)+1;
+                            pt2.j = pt.j;
+                            img_set_value(rot, pt2.i, pt2.j, label);
+                            stckpt_push(cc, pt2);
+                        }
+                        if(esq == 1 && v2 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                            pt2.i = pt.i;
+                            pt2.j = (pt.j)-1;
+                            img_set_value(rot, pt2.i, pt2.j, label);
+                            stckpt_push(cc, pt2);
+                        }
+                            
                 } // while
                 label++;
                 a = 0;
             } // if
         }
     }
-    char f2[4]; 
-    verify_format(file2, f2);   // verificação do formato especificado no arquivo de saida para fazer a escrita;
     if(!strcmp(f2, "txt")){
         write_text(rot, file2); // caso de escrita em arquivo texto;
-    }else if(!strcmp(f2, "imm")){
+    }else{
         write_imm(rot, file2);  // caso de escrita em arquivo binário;
-    }
-    else{
-        return INVALID_FORMAT_FILE;
     }
     stckpt_free(cc); // desalocando a pilha utilizada;
     img_free(img);  // desalocando a imagem original utilizada;
@@ -346,11 +361,11 @@ int find_cc(char *file1, char *file2){
 }
 
 int lab_escape(char *file1, char *file2){
-    char f[4];
-    TImg *img = NULL, *lab = NULL; // img de imagem original, rot de imagem rotulada;
+    char f[4], f2[4];
+    TImg *img = NULL, *lab = NULL; // img de imagem original, lab de imagem labirinto;
     TStckpt *lab_esc = stckpt_create();
     point pt;
-    verify_format(file1, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
+    verify_format(file1, f);  // verificando o formato do arquivo de entrada para utilizar a função de leitura correta;
     if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
         img = read_txt_file(file1);
     }else if(!strcmp(f, "imm")){   // caso de segmentacao de txt para imm;
@@ -358,6 +373,10 @@ int lab_escape(char *file1, char *file2){
     }
     if(img == NULL){ // se o file1 não for nem txt nem imm, vai entrar neste if e retornar erro;
         return INVALID_NULL_POINTER;
+    }
+    verify_format(file2, f2); // verificação do formato do arquivo à ser criado, caso seja divergente, não perde tempo na função;
+    if((strcmp(f2, "txt"))&&(strcmp(f2, "imm"))){ // se houver divergencias entre a extensao, entrara nessa if e gerará erro;
+            return INVALID_FORMAT_FILE;
     }
     int lin = img_get_line(img), col = img_get_columns(img); // variaveis para inicialização da imagem de escape do labirinto;
     lab = img_create(lin, col);
@@ -418,19 +437,14 @@ int lab_escape(char *file1, char *file2){
             } // while
         } // if
     } // for
-    char f2[4];
-    verify_format(file2, f2); // verificação do formato do arquivo à ser criado, para chamar a função de escrita correta;
     if(!strcmp(f2, "txt")){
         write_text(img, file2); // escrita em texto;
-    }else if(!strcmp(f2, "imm")){
+    }else{
         write_imm(img, file2);  // escrita em imm;
     }
-    else{
-        return INVALID_FORMAT_FILE; // caso o nome especificado não seja no formato compativel, retorna codigo de erro;
-    }
     stckpt_free(lab_esc); // liberando a memoria alocada para a pilha auxiliar;
-    img_free(img); // liberando memoria da imagem auxiliar com a imagem original;
-    img_free(lab); // liberando memoria da imagem auxiliar com o escape do labirinto;
+    img_free(img); // liberando memoria da imagem original;
+    img_free(lab); // liberando memoria da imagem auxiliar;
 
     return SUCCESS;
 }
