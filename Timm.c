@@ -274,7 +274,7 @@ int find_cc(char *file1, char *file2){
     char f[4];
     TImg *img = NULL, *rot = NULL; // img de imagem original, rot de imagem rotulada;
     TStckpt *cc = stckpt_create();
-    point pt, pt2;
+    point pt;
     verify_format(file1, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
     if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
         img = read_txt_file(file1);
@@ -302,27 +302,25 @@ int find_cc(char *file1, char *file2){
                 img_set_value(rot, i, j, label);
                 stckpt_push(cc, pt);
                 while(a != EMPTY_LIST){ // variavel "a" auxiliar para verificar se a pilha esta vazia ou nao;
-                    a = stckpt_top(cc, &pt2);
-                    a = stckpt_pop(cc);
-                    while(k != -2){
-                        img_get_value(img, (pt2.i)+k, pt2.j, &v1); // verifica os vizinhos horizontais na imagem orignal;
-                        img_get_value(rot, (pt2.i)+k, pt2.j, &v2); // verifica os vizinhos horizontais na imagem rotulada;
-                        img_get_value(img, pt2.i, (pt2.j)+k, &v3); // verifica os vizinhos verticais na imagem orignal;
-                        img_get_value(rot, pt2.i, (pt2.j)+k, &v4); // verifica os vizinhos verticais na imagem rotulada;
-                        if(v1 == 1 && v2 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
-                            pt2.i += k;
-                            img_set_value(rot, pt2.i, pt2.j, label);
-                            stckpt_push(cc, pt2);
+                    a = stckpt_top(cc, &pt);
+                    //a = stckpt_pop(cc);
+                    while(k != -3){
+                        img_get_value(img, (pt.i)+k, pt.j, &v1); // verifica os vizinhos horizontais na imagem orignal;
+                        img_get_value(rot, (pt.i)+k, pt.j, &v2); // verifica os vizinhos horizontais na imagem rotulada;
+                        img_get_value(img, pt.i, (pt.j)+k, &v3); // verifica os vizinhos verticais na imagem orignal;
+                        img_get_value(rot, pt.i, (pt.j)+k, &v4); // verifica os vizinhos verticais na imagem rotulada;
+                        if((v1 == 1 && v2 == 0)||(v3 == 1 && v4 == 0)){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
+                            if(v1 == 1)
+                                pt.i += k;
+                            else if(v3 == 1)
+                                pt.j += k;
+                            img_set_value(rot, pt.i, pt.j, label);
+                            stckpt_push(cc, pt);
                         }
-                        if(v3 == 1 && v4 == 0){ // adiciona na pilha as cordenadas que são iguais à 1 na imagem original*; *se eu entendi direito, a segunda verificação é para nao se repetir posições;
-                            pt2.j += k;
-                            img_set_value(rot, pt2.i, pt2.j, label);
-                            stckpt_push(cc, pt2);
+                        else{
+                            stckpt_pop(cc);
                         }
-                        k--;
-                        if(k == 0){ // somando novamente a variavel k, para que o laço não acesse a posição em que já estamos trabalhando;
-                            k--;
-                        }
+                        k-=2;
                     } // while
                     k = 1;
                 } // while
@@ -371,9 +369,11 @@ int lab_escape(char *file1, char *file2){
     for(int i = 0; i < lin; i++){ // for em busca da entrada do labirinto, percorrendo apenas a primeira coluna;
         img_get_value(img, i, 0, &value); // lendo o primeiro valor de cada linha;
         if(value == 1){
-            img_set_value(img, i, 0, label); // como é o primeiro pixel, já é inserido na imagem com escape do labirinto;
+            pt.i = i; pt.j = 0;
+            img_set_value(img, pt.i, pt.j, label); // como é o primeiro pixel, já é inserido na imagem com escape do labirinto;
             stckpt_push(lab_esc, pt); // adicionando o pixel de entrada do labirinto na pilha;
-            img_set_value(img, i, 1, label); // adicionando o segundo ponto na pilha automatico por ja saber que o labirinto segue à esquerda;
+            pt.i = i; pt.j = 1;
+            img_set_value(img, pt.i, pt.j, label); // adicionando o segundo ponto na pilha automatico por ja saber que o labirinto segue à direita;
             stckpt_push(lab_esc, pt);
             while((pt.j)+1 != col){ // enquanto não encontra o pixel de saida, localizado na ultima coluna, o while percorre todos os caminhos;
                 stckpt_top(lab_esc, &pt);
@@ -387,33 +387,34 @@ int lab_escape(char *file1, char *file2){
                 img_get_value(lab, pt.i, (pt.j)+1, &v4); // verificação de pixel já lido na imagem com escape do labirinto;
                 if(cima == 1 && v1 == 0){ // se o pixel vizinho acima tem valor 1 na imagem original, sua posição é inserida na pilha;
                     pt.i -= 1;
-                    img_set_value(img, pt.i, pt.j, label);
                     img_set_value(lab, pt.i, pt.j, label);
+                    img_set_value(img, pt.i, pt.j, label);
                     stckpt_push(lab_esc, pt);
-                    break;
                 }
-                if(baixo == 1 && v2 == 0){ // se o pixel vizinho abaixo tem valor 1 na imagem original, sua posição é inserida na pilha;
+                else if(baixo == 1 && v2 == 0){ // se o pixel vizinho abaixo tem valor 1 na imagem original, sua posição é inserida na pilha;
                     pt.i += 1;
-                    img_set_value(img, pt.i, pt.j, label);
                     img_set_value(lab, pt.i, pt.j, label);
+                    img_set_value(img, pt.i, pt.j, label);
                     stckpt_push(lab_esc, pt);
-                    break;
                 }
-                if(esquerda == 1 && v3 == 0){ // se o pixel vizinho à esquerda tem valor 1 na imagem original, sua posição é inserida na pilha;
+                else if(esquerda == 1 && v3 == 0){ // se o pixel vizinho à esquerda tem valor 1 na imagem original, sua posição é inserida na pilha;
                     pt.j -= 1;
-                    img_set_value(img, pt.i, pt.j, label);
                     img_set_value(lab, pt.i, pt.j, label);
+                    img_set_value(img, pt.i, pt.j, label);
                     stckpt_push(lab_esc, pt);
-                    break;
                 }
-                if(direita == 1 && v4 == 0){ // se o pixel vizinho à direita tem valor 1 na imagem original, sua posição é inserida na pilha;
+                else if(direita == 1 && v4 == 0){ // se o pixel vizinho à direita tem valor 1 na imagem original, sua posição é inserida na pilha;
                     pt.j += 1;
-                    img_set_value(img, pt.i, pt.j, label);
                     img_set_value(lab, pt.i, pt.j, label);
+                    img_set_value(img, pt.i, pt.j, label);
                     stckpt_push(lab_esc, pt);
-                    break;
                 }
-                stckpt_pop(lab_esc); // removendo o beco sem saida da pilha;
+                else{
+                    stckpt_pop(lab_esc); // removendo o beco sem saida da pilha;
+                    img_set_value(img, pt.i, pt.j, 1); // apagando o caminho sem saida;
+                    img_set_value(lab, pt.i, pt.j, 1); // apagando o caminho sem saida;
+                }
+                it = 0;
             } // while
         } // if
     } // for
