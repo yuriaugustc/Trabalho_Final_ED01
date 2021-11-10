@@ -351,7 +351,7 @@ int lab_escape(char *file1, char *file2){
     char f[4];
     TImg *img = NULL, *lab = NULL; // img de imagem original, rot de imagem rotulada;
     TStckpt *lab_esc = stckpt_create();
-    point pt, pt2;
+    point pt;
     verify_format(file1, f);  // verificando o formato do nome especificado para arquivo de saida(se for .imm, abre um arquivo para escrita em binario, se nao, em texto)
     if(!strcmp(f, "txt")){  // caso de segmentacao de txt para txt;
         img = read_txt_file(file1);
@@ -371,58 +371,58 @@ int lab_escape(char *file1, char *file2){
     for(int i = 0; i < lin; i++){ // for em busca da entrada do labirinto, percorrendo apenas a primeira coluna;
         img_get_value(img, i, 0, &value); // lendo o primeiro valor de cada linha;
         if(value == 1){
-            img_set_value(lab, i, 0, label); // como é o primeiro pixel, já é inserido na imagem com escape do labirinto;
-            pt.i = i; pt.j = 0;
+            img_set_value(img, i, 0, label); // como é o primeiro pixel, já é inserido na imagem com escape do labirinto;
             stckpt_push(lab_esc, pt); // adicionando o pixel de entrada do labirinto na pilha;
-            while((pt2.j)+1 != col){ // enquanto não encontra o pixel de saida, localizado na ultima coluna, o while percorre todos os caminhos;
-                stckpt_top(lab_esc, &pt2);
-                img_get_value(img, (pt2.i)-1, pt2.j, &cima); // verificação de vizinhos do pixel adicionado na pilha;
-                img_get_value(lab, (pt2.i)-1, pt2.j, &v1); // verificação de pixel já lido na imagem com escape do labirinto;
-                img_get_value(img, (pt2.i)+1, pt2.j, &baixo); // verificação de vizinhos do pixel adicionado na pilha;
-                img_get_value(lab, (pt2.i)+1, pt2.j, &v2); // verificação de pixel já lido na imagem com escape do labirinto;
-                img_get_value(img, pt2.i, (pt2.j)-1, &esquerda); // verificação de vizinhos do pixel adicionado na pilha;
-                img_get_value(lab, pt2.i, (pt2.j)-1, &v3); // verificação de pixel já lido na imagem com escape do labirinto;
-                img_get_value(img, pt2.i, (pt2.j)+1, &direita); // verificação de vizinhos do pixel adicionado na pilha;
-                img_get_value(lab, pt2.i, (pt2.j)+1, &v4); // verificação de pixel já lido na imagem com escape do labirinto;
+            img_set_value(img, i, 1, label); // adicionando o segundo ponto na pilha automatico por ja saber que o labirinto segue à esquerda;
+            stckpt_push(lab_esc, pt);
+            while((pt.j)+1 != col){ // enquanto não encontra o pixel de saida, localizado na ultima coluna, o while percorre todos os caminhos;
+                stckpt_top(lab_esc, &pt);
+                img_get_value(img, (pt.i)-1, pt.j, &cima); // verificação de vizinhos do pixel adicionado na pilha;
+                img_get_value(lab, (pt.i)-1, pt.j, &v1); // verificação de pixel já lido na imagem com escape do labirinto;
+                img_get_value(img, (pt.i)+1, pt.j, &baixo); // verificação de vizinhos do pixel adicionado na pilha;
+                img_get_value(lab, (pt.i)+1, pt.j, &v2); // verificação de pixel já lido na imagem com escape do labirinto;
+                img_get_value(img, pt.i, (pt.j)-1, &esquerda); // verificação de vizinhos do pixel adicionado na pilha;
+                img_get_value(lab, pt.i, (pt.j)-1, &v3); // verificação de pixel já lido na imagem com escape do labirinto;
+                img_get_value(img, pt.i, (pt.j)+1, &direita); // verificação de vizinhos do pixel adicionado na pilha;
+                img_get_value(lab, pt.i, (pt.j)+1, &v4); // verificação de pixel já lido na imagem com escape do labirinto;
                 if(cima == 1 && v1 == 0){ // se o pixel vizinho acima tem valor 1 na imagem original, sua posição é inserida na pilha;
-                    pt2.i -= 1;
-                    img_set_value(lab, pt2.i, pt2.j, label);
-                    stckpt_push(lab_esc, pt2);
-                    it++;
+                    pt.i -= 1;
+                    img_set_value(img, pt.i, pt.j, label);
+                    img_set_value(lab, pt.i, pt.j, label);
+                    stckpt_push(lab_esc, pt);
+                    break;
                 }
                 if(baixo == 1 && v2 == 0){ // se o pixel vizinho abaixo tem valor 1 na imagem original, sua posição é inserida na pilha;
-                    pt2.i += 1;
-                    img_set_value(lab, pt2.i, pt2.j, label);
-                    stckpt_push(lab_esc, pt2);
-                    it++;
+                    pt.i += 1;
+                    img_set_value(img, pt.i, pt.j, label);
+                    img_set_value(lab, pt.i, pt.j, label);
+                    stckpt_push(lab_esc, pt);
+                    break;
                 }
                 if(esquerda == 1 && v3 == 0){ // se o pixel vizinho à esquerda tem valor 1 na imagem original, sua posição é inserida na pilha;
-                    pt2.j -= 1;
-                    img_set_value(lab, pt2.i, pt2.j, label);
-                    stckpt_push(lab_esc, pt2);
-                    it++;
+                    pt.j -= 1;
+                    img_set_value(img, pt.i, pt.j, label);
+                    img_set_value(lab, pt.i, pt.j, label);
+                    stckpt_push(lab_esc, pt);
+                    break;
                 }
                 if(direita == 1 && v4 == 0){ // se o pixel vizinho à direita tem valor 1 na imagem original, sua posição é inserida na pilha;
-                    pt2.j += 1;
-                    img_set_value(lab, pt2.i, pt2.j, label);
-                    stckpt_push(lab_esc, pt2);
-                    it++;
+                    pt.j += 1;
+                    img_set_value(img, pt.i, pt.j, label);
+                    img_set_value(lab, pt.i, pt.j, label);
+                    stckpt_push(lab_esc, pt);
+                    break;
                 }
-                if(it == 0){ // a variavel "it" controla se o codigo entrou em algum if acima, se nao, o codigo chegou à um beco sem saida, então ele desempilha e apaga aquele caminho tanto da imagem original quanto da imagem com escape do labirinto;
-                    stckpt_pop(lab_esc); // removendo o beco sem saida da pilha;
-                    img_set_value(img, pt2.i, pt2.j, 0); // apagando o caminho sem saida;
-                    img_set_value(lab, pt2.i, pt2.j, 0); // apagando o caminho sem saida;
-                }
-                it = 0; // zerando a verificação para que não interfira na próxima iteração;
+                stckpt_pop(lab_esc); // removendo o beco sem saida da pilha;
             } // while
         } // if
     } // for
     char f2[4];
     verify_format(file2, f2); // verificação do formato do arquivo à ser criado, para chamar a função de escrita correta;
     if(!strcmp(f2, "txt")){
-        write_text(lab, file2); // escrita em texto;
+        write_text(img, file2); // escrita em texto;
     }else if(!strcmp(f2, "imm")){
-        write_imm(lab, file2);  // escrita em imm;
+        write_imm(img, file2);  // escrita em imm;
     }
     else{
         return INVALID_FORMAT_FILE; // caso o nome especificado não seja no formato compativel, retorna codigo de erro;
