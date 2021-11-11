@@ -430,10 +430,9 @@ int lab_escape(char *file1, char *file2){
                 }
                 else{
                     stckpt_pop(lab_esc); // removendo o beco sem saida da pilha;
-                    img_set_value(img, pt.i, pt.j, 1); // apagando o caminho sem saida;
-                    img_set_value(lab, pt.i, pt.j, 1); // apagando o caminho sem saida;
+                    img_set_value(img, pt.i, pt.j, 1); // removendo o caminho sem saida da pilha;
+                    img_set_value(lab, pt.i, pt.j, 1); // removendo o caminho sem saida da pilha;
                 }
-                it = 0;
             } // while
         } // if
     } // for

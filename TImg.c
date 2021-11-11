@@ -6,7 +6,7 @@ struct TImg
 {
   int nrows; // number of lines
   int ncolumns; // number of columns
-  unsigned int *data; // ponteir to matrices's data;
+  int *data; // ponteir to matrices's data;
 };
 
 /*  Descripition: This function initializes and allocates memory space foo the matrix whose line and column were passed to the criation;
