@@ -2,7 +2,7 @@
     Arquivo para guardar funcoes criadas nao utilizadas que talvez venham a ser (ou nao)
 
 
-void convert_dec_2_bin(int dec, int *bin){ //criei essa funcao achando que precisava converter para binario antes de usar fwrite ;-;
+void convert_dec_2_bin(int dec, int *bin){ esta funcao serve para qualquer base numerica, basta substituir o 10 dentro do while para a base desejada;
     int aux = 0, j = 0, vet[9];
     *bin = 0;
     while(dec != 0 && dec != 1){ // este while serve para achar a representação binaria, separando cada digito em uma posição do vetor para saber o tamanho do digito;
@@ -17,7 +17,7 @@ void convert_dec_2_bin(int dec, int *bin){ //criei essa funcao achando que preci
     }
 }
 
-void convert_bin_2_dec(int bin, int *dec){ 
+void convert_bin_2_dec(int bin, int *dec){ // esta funcao serve para qualquer base numerica, basta substituir o 10 dentro do while para a base desejada;
     int count = 0;
     int vet[9], i = 0;
     *dec = 0;
